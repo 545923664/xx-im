@@ -33,7 +33,7 @@ public class MinaServerHandler extends IoHandlerAdapter {
 	public void messageReceived(IoSession currentSession, Object message) {
 		try {
 			String json = message.toString();
-			
+
 			L.out("<<<<<<<<<<<<<<<<<<<<<<<<<" + json);
 
 			MyMessage msg = gson.fromJson(json, MyMessage.class);
@@ -58,7 +58,8 @@ public class MinaServerHandler extends IoHandlerAdapter {
 
 				if (InstantConstant.LOGIN.equals(model)) {// 登陆模块
 					// 加入服务器
-					SessionManager.join(redisService, username, currentSession,msg);
+					SessionManager.join(redisService, username, currentSession,
+							msg);
 					// 登陆需要插队到最前面
 					MessageManager.joinCtrlQueue(redisService, json);
 					// 登陆完成后推送离线
@@ -68,7 +69,7 @@ public class MinaServerHandler extends IoHandlerAdapter {
 					// 检查状态
 					if (userStatus != 0) {// 需要重新加入
 						SessionManager.join(redisService, username,
-								currentSession,msg);
+								currentSession, msg);
 						// 登陆完成后推送离线
 						MessageManager.sendLeaveMessage(username, redisService,
 								mongoService);
@@ -98,11 +99,12 @@ public class MinaServerHandler extends IoHandlerAdapter {
 					}
 				} else if (InstantConstant.PING.equals(model)) {// ping
 					MessageManager.joinCtrlQueue(redisService, json);
+				} else if (InstantConstant.SYS.equals(model)) {//系统信息：添加好友等等
+					
 				}
 
 			} else {
-				// 不合法
-				// TODO
+				SendMessage.sendErrTip(currentSession);
 			}
 
 		} catch (Exception e) {

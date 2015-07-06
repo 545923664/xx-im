@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.mina.core.session.IoSession;
+
 import com.google.gson.Gson;
 import com.jzwl.base.service.MongoService;
 import com.jzwl.base.service.RedisService;
@@ -70,7 +72,6 @@ public class MessageManager {
 
 	}
 
-
 	/**
 	 * 获取下一个发送的消息
 	 * 
@@ -103,5 +104,7 @@ public class MessageManager {
 	public static String getNextCtrlMessage(RedisService redisService) {
 		return redisService.out(InstantConstant.recieve_message_queus_key);
 	}
+
+
 
 }

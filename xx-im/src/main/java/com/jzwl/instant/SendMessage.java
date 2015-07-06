@@ -161,4 +161,21 @@ public class SendMessage {
 		}
 
 	}
+
+	/**
+	 * 发送提示类
+	 * 
+	 * @param session
+	 * @param myMessage
+	 */
+	public static void sendErrTip(IoSession session) {
+		MyMessage message = new MyMessage();
+
+		message.setModel(InstantConstant.ERROR);
+		message.setMessage("传输格式错误");
+		message.setDate(DateUtil.getDate());
+
+		session.write(gson.toJson(message));
+
+	}
 }

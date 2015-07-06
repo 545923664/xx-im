@@ -2,11 +2,11 @@ package com.jzwl.instant.util;
 
 public class InstantConstant {
 
-//	public static final String redis_root = "im.dev.";
-//	public static String server_connect_address = "192.168.1.200:12356";
+	public static final String redis_root = "im.dev.";
+	public static String server_connect_address = "192.168.1.200:12356";
 
-	public static final String redis_root = "im.";
-	public static String server_connect_address = "192.168.1.12:12356";//
+	// public static final String redis_root = "im.";
+	// public static String server_connect_address = "192.168.1.12:12356";//
 	// 客户端连接地址·
 
 	// redis接收消息 队列 key
@@ -33,14 +33,14 @@ public class InstantConstant {
 	public static final String mongodb_fileinfo = "message_fileinfo";
 
 	/**
+	 * 上下线通知
+	 */
+	public static final boolean ON_OFF_LINE_BROCAST = true;
+
+	/**
 	 * 登录
 	 */
 	public static final String LOGIN = "login";
-
-	/**
-	 * 上下线通知
-	 */
-	public static final boolean ON_OFF_LINE_BROCAST = false;
 
 	/**
 	 * 聊天消息发送
@@ -51,6 +51,16 @@ public class InstantConstant {
 	 * ping pong
 	 */
 	public static final String PING = "ping";
+
+	/**
+	 * 系统消息
+	 */
+	public static final String SYS = "system";
+	
+	/**
+	 * 系统消息
+	 */
+	public static final String ERROR = "error";
 
 	/**
 	 * 重新登录
