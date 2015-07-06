@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd  
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd  
+http://www.springframework.org/schema/data/mongo  http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd  
+http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd">
+
+	<bean id="initAndDestroySeqBean" class="com.jzwl.common.init.Spring.SpringInit"
+		 init-method="initMethod" destroy-method="destroyMethod" />
+
+	<!-- 配置扫描，这里因为涉及到spring mvc的流转，所以暂时过滤掉一部分，延后扫描 -->
+	<context:component-scan base-package="com.jzwl.*">
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+
+	<!-- 数据源，这是自己定义的数据源，便于用算法切换，后期用zookeeper动态管理 -->
+	<bean id="dataSource" class="com.jzwl.base.dal.holder.DynamicDataSource">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="writeDataSource-1" value-ref="writeDataSource-1" />
+				<entry key="readDataSource-1" value-ref="readDataSource-1" />
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" ref="writeDataSource-1" />
+	</bean>
+
+	<!-- 数据源计数，便于切换。有几个读的数据源，几个写的数据源。这里要注意数据源的命名规范 -->
+	<bean id="dataSourceNumberKeeper" class="com.jzwl.base.dal.holder.DataSourceNumberKeeper"
+		init-method="init">
+		<property name="readDataSourceNumber" value="1" />
+		<property name="writeDataSourceNumber" value="1" />
+	</bean>
+
+	<!-- JNDI数据源的方式，但是不大想用 -->
+	<!-- <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"> 
+		<property name="jndiName" value="jdbc/mytest"></property> <property name="resourceRef" 
+		value="true"></property> </bean> -->
+
+	<!-- jdbcTemplate需要配置dataSource，因为里面有一个set方法，所以注入给它 -->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+
+	<!-- 配置spring-jdbcTemplate模板 -->
+	<bean id="baseDAO" class="com.jzwl.base.dao.impl.BaseDAOImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate"></property>
+	</bean>
+
+	<!-- 事务管理 -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource">
+			<ref local="dataSource" />
+		</property>
+	</bean>
+
+	<!--事务模板 -->
+	<bean id="transactionTemplate"
+		class="org.springframework.transaction.support.TransactionTemplate">
+		<property name="transactionManager">
+			<ref local="transactionManager" />
+		</property>
+	</bean>
+
+	<!-- 事务拦截器，定义事务类型 -->
+	<bean id="transactionInterceptor"
+		class="org.springframework.transaction.interceptor.TransactionInterceptor">
+		<property name="transactionManager">
+			<ref bean="transactionManager" />
+		</property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="*">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- 定义事务生效域 -->
+	<bean
+		class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+		<property name="beanNames">
+			<list>
+				<value>*Service</value>
+			</list>
+		</property>
+		<property name="interceptorNames">
+			<list>
+				<value>transactionInterceptor</value>
+			</list>
+		</property>
+	</bean>
+	<!-- 注解方式配置事物，这里开放出来，首要目标是为了单元测试用 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<!-- spring线程池，控制单个JVM的子线程数，拒绝多余连接请求，防止JVM爆掉 -->
+	<bean id="simpleAsyncTaskExecutor" class="org.springframework.core.task.SimpleAsyncTaskExecutor">
+		<property name="daemon" value="true" />
+		<property name="concurrencyLimit" value="${thread_limit}" />
+		<property name="threadNamePrefix" value="simpleAsyncTaskExecutor" />
+	</bean>
+
+	<!-- 开发环境配置文件 -->
+	<beans profile="dev">
+		<context:property-placeholder location="classpath*:/config_develop.properties"
+			ignore-unresolvable="true" />
+	</beans>
+
+	<!-- 正式环境配置文件 -->
+	<beans profile="prod">
+		<context:property-placeholder
+			location="classpath*:/config_production.properties"
+			ignore-unresolvable="true" />
+	</beans>
+
+	<!-- 测试环境配置文件 -->
+	<beans profile="test">
+		<context:property-placeholder location="classpath*:/config_test.properties"
+			ignore-unresolvable="true" />
+	</beans>
+
+</beans>

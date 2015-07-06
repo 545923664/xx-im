@@ -1,0 +1,82 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.jzwl</groupId>
+	<artifactId>mynew</artifactId>
+	<packaging>war</packaging>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>mynew</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<war.name>mynew</war.name><!-- war名称 -->
+		<lib.dir>${basedir}/WebContent/WEB-INF/lib</lib.dir>
+	</properties>
+
+	<build>
+		<finalName>${war.name}</finalName><!-- war名称 -->
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<encoding>utf-8</encoding>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<!-- 设置WebContent目录为Web目录 -->
+					<warSourceDirectory>${basedir}/WebContent</warSourceDirectory>
+				</configuration>
+			</plugin>
+		</plugins>
+		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+		<outputDirectory>${basedir}/WebContent/WEB-INF/classes</outputDirectory>
+		<!-- <testSourceDirectory>${basedir}/test</testSourceDirectory> --><!-- 定义测试目录 -->
+		<!--<testOutputDirectory>${basedir}/WebContent/WEB-INF/test-classes</testOutputDirectory> --><!-- 定义测试目录发布路径 -->
+		<resources>
+			<resource>
+				<directory>${basedir}/src/main/resources</directory>
+				<targetPath>${basedir}/WebContent/WEB-INF/classes</targetPath>
+			</resource>
+		</resources>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>spring</groupId>
+			<artifactId>spring-security-core</artifactId>
+			<version>2.0.5.RELEASE</version>
+			<scope>system</scope>
+			<systemPath>${lib.dir}/spring-security-core-2.0.5.RELEASE.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>spring</groupId>
+			<artifactId>spring-security-core-tiger</artifactId>
+			<version>2.0.5.RELEASE</version>
+			<scope>system</scope>
+			<systemPath>${lib.dir}/spring-security-core-tiger-2.0.5.RELEASE.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>spring</groupId>
+			<artifactId>spring-security-taglibs</artifactId>
+			<version>2.0.5.RELEASE</version>
+			<scope>system</scope>
+			<systemPath>${lib.dir}/spring-security-taglibs-2.0.5.RELEASE.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>spring</groupId>
+			<artifactId>spring-security-acl</artifactId>
+			<version>2.0.5.RELEASE</version>
+			<scope>system</scope>
+			<systemPath>${lib.dir}/spring-security-acl-2.0.5.RELEASE.jar</systemPath>
+		</dependency>
+		
+
+	</dependencies>
+
+</project>
