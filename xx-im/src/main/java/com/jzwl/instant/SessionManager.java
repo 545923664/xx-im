@@ -7,9 +7,10 @@ import java.util.Map;
 import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.session.IoSession;
 
+import com.jzwl.base.service.MongoService;
 import com.jzwl.base.service.RedisService;
 import com.jzwl.instant.pojo.MyMessage;
-import com.jzwl.instant.util.InstantConstant;
+import com.jzwl.instant.util.IC;
 import com.jzwl.instant.util.L;
 
 /**
@@ -33,15 +34,15 @@ public class SessionManager {
 	}
 
 	// 加入状态
-	public static void join(RedisService redisService, String username,
+	public static void join(RedisService redisService, MongoService mongoService, String username,
 			IoSession newSession, MyMessage msg) {
 
 		usersMap.put(username, newSession);
 		
 		//保存用户信息
-		UserManager.setUserInfo(redisService, username, newSession, msg);
+		UserManager.setUserInfo(redisService, mongoService,username, newSession, msg);
 
-		if (InstantConstant.ON_OFF_LINE_BROCAST) {
+		if (IC.ON_OFF_LINE_BROCAST) {
 			SendMessage.sendSystemMessage(redisService,
 					SendMessage.sys_on_brocast, username);
 		}
@@ -144,7 +145,7 @@ public class SessionManager {
 	public static boolean isPing(IoSession session, String username) {
 		MyMessage msg = new MyMessage();
 
-		msg.setModel(InstantConstant.PING);
+		msg.setModel(IC.PING);
 		msg.setMessage("ping");
 
 		return false;

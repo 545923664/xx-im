@@ -1,6 +1,11 @@
 package com.jzwl.instant.util;
 
-public class InstantConstant {
+/**
+ * InstantConstant
+ * @author xx
+ *
+ */
+public class IC {
 
 	public static final String redis_root = "im.dev.";
 	public static String server_connect_address = "192.168.1.200:12356";
@@ -32,6 +37,13 @@ public class InstantConstant {
 	// mongo传输的文件
 	public static final String mongodb_fileinfo = "message_fileinfo";
 
+	// mongo好友关系
+	public static final String mongodb_friendinfo = "friend_info";
+	
+	//用户信息
+	public static final String mongodb_userinfo = "user_info";
+
+	
 	/**
 	 * 上下线通知
 	 */
@@ -56,7 +68,17 @@ public class InstantConstant {
 	 * 系统消息
 	 */
 	public static final String SYS = "system";
-	
+
+	/**
+	 * 添加好友
+	 */
+	public static final String ACTION_ADD_FRIEND = "addfriend";
+
+	/**
+	 * 同意申请
+	 */
+	public static final String ACTION_AGREE_FRIEND = "agreefriend";
+
 	/**
 	 * 系统消息
 	 */

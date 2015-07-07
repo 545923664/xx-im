@@ -19,6 +19,25 @@ public class UserInfo {
 
 	private long sessionID;
 
+	/**
+	 * 默认不在线1=在线 0不在线
+	 * 
+	 */
+	private String isOnline = "0";
+	
+	/**
+	 * 默认不是好友 1=是好友 0=不是
+	 */
+	private String isFriend="0";
+
+	public String getIsOnline() {
+		return isOnline;
+	}
+
+	public void setIsOnline(String isOnline) {
+		this.isOnline = isOnline;
+	}
+
 	public long getSessionID() {
 		return sessionID;
 	}
@@ -50,5 +69,15 @@ public class UserInfo {
 	public void setConnectAddress(String connectAddress) {
 		this.connectAddress = connectAddress;
 	}
+
+	public String getIsFriend() {
+		return isFriend;
+	}
+
+	public void setIsFriend(String isFriend) {
+		this.isFriend = isFriend;
+	}
+	
+	
 
 }

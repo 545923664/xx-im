@@ -3,6 +3,7 @@ package com.jzwl.instant.controller;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -19,13 +20,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.google.gson.Gson;
 import com.jzwl.base.service.MongoService;
 import com.jzwl.base.service.RedisService;
+import com.jzwl.instant.FriendManager;
 import com.jzwl.instant.MinaCoreService;
 import com.jzwl.instant.SessionManager;
 import com.jzwl.instant.UserManager;
 import com.jzwl.instant.pojo.MyMessage;
 import com.jzwl.instant.pojo.UserInfo;
-import com.jzwl.instant.util.ChinaNameUtil;
-import com.jzwl.instant.util.InstantConstant;
+import com.jzwl.instant.util.IC;
 import com.jzwl.instant.util.JsonTool;
 import com.jzwl.instant.util.Util;
 
@@ -55,30 +56,66 @@ public class ChatController {
 	public void getOnlineuser(HttpServletRequest request,
 			HttpServletResponse response) {
 		try {
+
+			String uid = request.getParameter("uid");
+
 			Set<String> keys = SessionManager.usersMap.keySet();
 
-			ArrayList<UserInfo> list = new ArrayList<UserInfo>();
+			Map<String, UserInfo> temp = new HashMap<String, UserInfo>();
 
+			List<String> friendIDList = new ArrayList<String>();
+
+			// 先获取好友
+			if (null != uid) {
+				friendIDList = FriendManager.getFriendList(uid, mongoService);
+			}
+
+			for (String fid : friendIDList) {
+				UserInfo user = UserManager
+						.getUserInfoFromDB(mongoService, fid);
+
+				if (null != user) {
+					user.setIsFriend("1");
+					temp.put(fid, user);
+				}
+			}
+
+			// 获取在线用户
 			for (String username : keys) {
 
 				IoSession session = SessionManager.usersMap.get(username);
 
 				if (SessionManager.isAvaible(session)) {
 
-					UserInfo user = UserManager.getUserInfo(redisService,
-							username);
+					if (null != temp.get(username)) {//已经是好友则添加在线状态
+						UserInfo user = temp.get(username);
+						user.setIsOnline("1");
+						temp.put(username, user);
+					} else {//不是好友说明在线状态即可
+						UserInfo user = UserManager.getUserInfo(redisService,
+								username);
 
-					if (null != user) {
-						list.add(user);
+						if (null != user) {
+							user.setIsOnline("1");
+							temp.put(username, user);
+						}
 					}
 
 				}
 
 			}
 
+			// 合并
+			Set<String> ids = temp.keySet();
+
+			ArrayList<UserInfo> list = new ArrayList<UserInfo>();
+
+			for (String username : ids) {
+				list.add(temp.get(username));
+			}
+
 			String json = gson.toJson(list);
 			JsonTool.printMsg(response, json);
-			log.info(json);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -93,7 +130,7 @@ public class ChatController {
 			HttpServletResponse response) {
 
 		Map<String, String> config = new HashMap<String, String>();
-		config.put("serverAddress", InstantConstant.server_connect_address);// 服务器连接地址
+		config.put("serverAddress", IC.server_connect_address);// 服务器连接地址
 		config.put("username", System.currentTimeMillis() + "");// 用户标示符
 		// config.put("nickname", ChinaNameUtil.getSimpleName());// 用户昵称
 		config.put("nickname", "guest");// 用户昵称
@@ -102,34 +139,6 @@ public class ChatController {
 
 	}
 
-	@RequestMapping(value = "/getOnlineUserInfoList")
-	public void getOnlineUserList(HttpServletRequest request,
-			HttpServletResponse response) {
-		try {
-			Set<String> keys = SessionManager.usersMap.keySet();
-
-			ArrayList<UserInfo> list = new ArrayList<UserInfo>();
-
-			for (String key : keys) {
-				UserInfo user = new UserInfo();
-				user.setUsername(key);
-
-				if (null != user.getUsername()) {
-
-					user.setUserNickName("----");
-
-				}
-
-				list.add(user);
-			}
-
-			String json = JsonTool.getListJson(list, list.size(), null, null);
-			JsonTool.printMsg(response, json);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 
 	@RequestMapping(value = "/sendMsg.html")
 	public void sendMsg(HttpServletRequest request, HttpServletResponse response) {
@@ -139,7 +148,7 @@ public class ChatController {
 
 			if (null != tousername && null != sendMsg) {
 				MyMessage myMessage = new MyMessage();
-				myMessage.setModel(InstantConstant.BROCAST);
+				myMessage.setModel(IC.BROCAST);
 				myMessage.setMessage(sendMsg);
 				myMessage.setTousername(tousername);
 				myMessage.setUsername("#system#");

@@ -10,7 +10,7 @@ import com.jzwl.base.service.RedisService;
 import com.jzwl.instant.pojo.MyMessage;
 import com.jzwl.instant.pojo.UserInfo;
 import com.jzwl.instant.util.DateUtil;
-import com.jzwl.instant.util.InstantConstant;
+import com.jzwl.instant.util.IC;
 import com.jzwl.instant.util.L;
 
 /**
@@ -49,8 +49,8 @@ public class SendMessage {
 
 			String destUsername;
 
-			if (InstantConstant.LOGIN.equals(model)
-					|| InstantConstant.PING.equals(model)) {// 登陆|ping发给自己
+			if (IC.LOGIN.equals(model)
+					|| IC.PING.equals(model)) {// 登陆|ping发给自己
 				destUsername = username;
 			} else {// 其他发给好友
 				destUsername = toUsername;
@@ -61,9 +61,9 @@ public class SendMessage {
 			L.out(">>>>>>>>>>>>>>>>>>>" + sendFlag);
 
 			// 解决没有发送成功的消息
-			if (!model.equals(InstantConstant.LOGIN) && !sendFlag) {
+			if (!model.equals(IC.LOGIN) && !sendFlag) {
 				String mid = msg.getMsgid();
-				String key = InstantConstant.send_faile_times_key + "." + mid;
+				String key = IC.send_faile_times_key + "." + mid;
 
 				String sendFaileTimes = redisService.get(key);
 
@@ -76,12 +76,12 @@ public class SendMessage {
 					} else {// 发送失败下一次登陆继续给发
 						times++;
 						redisService
-								.set(key, times + "", InstantConstant.DAY_1);
+								.set(key, times + "", IC.DAY_1);
 						MessageManager.joinSendQueue(redisService, json);
 					}
 
 				} else {// 初次发送失败
-					redisService.set(key, 1 + "", InstantConstant.DAY_1);
+					redisService.set(key, 1 + "", IC.DAY_1);
 					MessageManager.joinSendQueue(redisService, json);
 
 				}
@@ -138,7 +138,7 @@ public class SendMessage {
 							if (SessionManager.isAvaible(toUserSession)) {
 								MyMessage message = new MyMessage();
 
-								message.setModel(InstantConstant.CHAT);
+								message.setModel(IC.CHAT);
 								message.setMessageType("0");
 								message.setUsername(username);
 								message.setTousername(toUsername);
@@ -171,8 +171,8 @@ public class SendMessage {
 	public static void sendErrTip(IoSession session) {
 		MyMessage message = new MyMessage();
 
-		message.setModel(InstantConstant.ERROR);
-		message.setMessage("传输格式错误");
+		message.setModel(IC.ERROR);
+		message.setMessage("sx format is error");
 		message.setDate(DateUtil.getDate());
 
 		session.write(gson.toJson(message));

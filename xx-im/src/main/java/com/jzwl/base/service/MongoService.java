@@ -13,7 +13,7 @@ public interface MongoService {
 
 	public List<DBObject> find(String table);
 
-	public List<DBObject> findOne(String table, Map<String, Object> cond);
+	public List<DBObject> findList(String table, Map<String, Object> cond);
 
 	public void del(String table,DBObject object);
 	

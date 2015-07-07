@@ -69,7 +69,7 @@ public class MongoServiceImpl implements MongoService {
 	}
 
 	@Override
-	public List findOne(String table,  Map<String, Object> cond) {
+	public List findList(String table,  Map<String, Object> cond) {
 		DBCollection collection = mongoTemplate.getCollection(table);
 
 		DBCursor cursorDoc = collection.find(new BasicDBObject(cond));

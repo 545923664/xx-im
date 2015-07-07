@@ -14,7 +14,7 @@ import com.google.gson.Gson;
 import com.jzwl.base.service.MongoService;
 import com.jzwl.instant.pojo.AixinMessage;
 import com.jzwl.instant.pojo.MyMessage;
-import com.jzwl.instant.util.InstantConstant;
+import com.jzwl.instant.util.IC;
 
 public class MinaCoreService {
 
@@ -145,7 +145,7 @@ public class MinaCoreService {
 		try {
 
 			if (null != msg) {
-				mongoService.save(InstantConstant.mongodb_message, msg);
+				mongoService.save(IC.mongodb_message, msg);
 			}
 
 		} catch (Exception e) {
@@ -250,7 +250,7 @@ public class MinaCoreService {
 
 			if (null != msg.getMsgid()) {
 				MyMessage callBackMessage = new MyMessage();
-				callBackMessage.setModel(InstantConstant.CHAT_SEND_ECHO);
+				callBackMessage.setModel(IC.CHAT_SEND_ECHO);
 				callBackMessage.setDate(System.currentTimeMillis() + "");
 				callBackMessage.setMessage(msg.getMsgid());
 				callBackMessage.setUsername("#system#");

@@ -101,7 +101,7 @@ public class UploadDownUtil {
 				fileBean.setUploadUserName(username);
 
 				// chatFileBeanService.save(fileBean);
-				mongoService.save(InstantConstant.mongodb_fileinfo, fileBean);
+				mongoService.save(IC.mongodb_fileinfo, fileBean);
 
 				// return fileBean.getId() + ";" + expandFlag;
 				return fileBean.getId();
@@ -162,8 +162,8 @@ public class UploadDownUtil {
 				Map<String, Object> cond = new HashMap<String, Object>();
 				cond.put("id", uploadFileId);
 
-				List<DBObject> list = mongoService.findOne(
-						InstantConstant.mongodb_fileinfo, cond);
+				List<DBObject> list = mongoService.findList(
+						IC.mongodb_fileinfo, cond);
 
 				if (null != list && list.size() > 0) {
 					DBObject obj = list.get(0);

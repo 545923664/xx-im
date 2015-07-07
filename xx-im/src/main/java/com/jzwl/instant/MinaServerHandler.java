@@ -10,7 +10,7 @@ import com.google.gson.Gson;
 import com.jzwl.base.service.MongoService;
 import com.jzwl.base.service.RedisService;
 import com.jzwl.instant.pojo.MyMessage;
-import com.jzwl.instant.util.InstantConstant;
+import com.jzwl.instant.util.IC;
 import com.jzwl.instant.util.L;
 
 public class MinaServerHandler extends IoHandlerAdapter {
@@ -56,20 +56,20 @@ public class MinaServerHandler extends IoHandlerAdapter {
 				}
 				L.out("<<<<<<<<<<<<<<<<<<<<<<<<<" + statusUserInfo);
 
-				if (InstantConstant.LOGIN.equals(model)) {// 登陆模块
+				if (IC.LOGIN.equals(model)) {// 登陆模块
 					// 加入服务器
-					SessionManager.join(redisService, username, currentSession,
-							msg);
+					SessionManager.join(redisService, mongoService, username,
+							currentSession, msg);
 					// 登陆需要插队到最前面
 					MessageManager.joinCtrlQueue(redisService, json);
 					// 登陆完成后推送离线
 					MessageManager.sendLeaveMessage(username, redisService,
 							mongoService);
-				} else if (InstantConstant.CHAT.equals(model)) {// 聊天模块
+				} else if (IC.CHAT.equals(model)) {// 聊天模块
 					// 检查状态
 					if (userStatus != 0) {// 需要重新加入
-						SessionManager.join(redisService, username,
-								currentSession, msg);
+						SessionManager.join(redisService, mongoService,
+								username, currentSession, msg);
 						// 登陆完成后推送离线
 						MessageManager.sendLeaveMessage(username, redisService,
 								mongoService);
@@ -97,10 +97,10 @@ public class MinaServerHandler extends IoHandlerAdapter {
 						MessageManager.saveLeavelMessage(mongoService, msg);
 
 					}
-				} else if (InstantConstant.PING.equals(model)) {// ping
+				} else if (IC.PING.equals(model)) {// ping
 					MessageManager.joinCtrlQueue(redisService, json);
-				} else if (InstantConstant.SYS.equals(model)) {//系统信息：添加好友等等
-					
+				} else if (IC.SYS.equals(model)) {// 系统信息：添加好友等等
+					// http发送 暂时不做处理
 				}
 
 			} else {
@@ -108,7 +108,8 @@ public class MinaServerHandler extends IoHandlerAdapter {
 			}
 
 		} catch (Exception e) {
-			log.error("<<<Exception>>>" + e.getMessage());
+			log.error("<<<mina server handler exc >>>" + e.getMessage());
+			SendMessage.sendErrTip(currentSession);
 		}
 
 	}

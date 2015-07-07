@@ -10,7 +10,7 @@ import com.google.gson.Gson;
 import com.jzwl.base.service.MongoService;
 import com.jzwl.base.service.RedisService;
 import com.jzwl.instant.pojo.MyMessage;
-import com.jzwl.instant.util.InstantConstant;
+import com.jzwl.instant.util.IC;
 import com.mongodb.DBObject;
 
 /**
@@ -31,7 +31,7 @@ public class MessageManager {
 	 */
 	public static void saveLeavelMessage(MongoService mongoService,
 			MyMessage msg) {
-		mongoService.save(InstantConstant.mongodb_leavel_message, msg);
+		mongoService.save(IC.mongodb_leavel_message, msg);
 	}
 
 	// 发送曾经离线的消息
@@ -41,10 +41,10 @@ public class MessageManager {
 			// 将发送失败的消息再次发送
 			Map<String, Object> cond = new HashMap<String, Object>();
 			cond.put("tousername", username);
-			cond.put("model", InstantConstant.CHAT);
+			cond.put("model", IC.CHAT);
 
-			List<DBObject> leavelMessageList = mongoService.findOne(
-					InstantConstant.mongodb_leavel_message, cond);
+			List<DBObject> leavelMessageList = mongoService.findList(
+					IC.mongodb_leavel_message, cond);
 
 			for (DBObject dbObject : leavelMessageList) {
 
@@ -52,7 +52,7 @@ public class MessageManager {
 
 				joinSendQueue(redisService, json);
 
-				mongoService.del(InstantConstant.mongodb_leavel_message,
+				mongoService.del(IC.mongodb_leavel_message,
 						dbObject);
 			}
 		} catch (Exception e) {
@@ -68,7 +68,7 @@ public class MessageManager {
 	 * @param msg
 	 */
 	public static void joinSendQueue(RedisService redisService, String json) {
-		redisService.in(InstantConstant.send_message_queus_key, json);
+		redisService.in(IC.send_message_queus_key, json);
 
 	}
 
@@ -79,7 +79,7 @@ public class MessageManager {
 	 * @return
 	 */
 	public static String getNextSendMessage(RedisService redisService) {
-		return redisService.out(InstantConstant.send_message_queus_key);
+		return redisService.out(IC.send_message_queus_key);
 
 	}
 
@@ -90,7 +90,7 @@ public class MessageManager {
 	 * @param json
 	 */
 	public static void joinCtrlQueue(RedisService redisService, String json) {
-		redisService.in(InstantConstant.recieve_message_queus_key, json);
+		redisService.in(IC.recieve_message_queus_key, json);
 
 	}
 
@@ -102,7 +102,7 @@ public class MessageManager {
 	 * @return
 	 */
 	public static String getNextCtrlMessage(RedisService redisService) {
-		return redisService.out(InstantConstant.recieve_message_queus_key);
+		return redisService.out(IC.recieve_message_queus_key);
 	}
 
 
