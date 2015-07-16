@@ -56,6 +56,8 @@ public class UploadDownUtil {
 			// 获得文件：
 			MultipartFile file = multipartRequest.getFile("file");
 			if (null != file) {
+				System.out.println(file);
+
 				// 获得输入流：
 				InputStream input = file.getInputStream();
 
@@ -100,10 +102,8 @@ public class UploadDownUtil {
 				fileBean.setUploadDate(Util.getCurrDate());
 				fileBean.setUploadUserName(username);
 
-				// chatFileBeanService.save(fileBean);
 				mongoService.save(IC.mongodb_fileinfo, fileBean);
 
-				// return fileBean.getId() + ";" + expandFlag;
 				return fileBean.getId();
 
 			}
@@ -112,7 +112,6 @@ public class UploadDownUtil {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println(e.getMessage());
 			return null;
 		}
 
@@ -158,7 +157,7 @@ public class UploadDownUtil {
 
 			if (null != uploadFileId) {
 				// uploadFileId
-				
+
 				Map<String, Object> cond = new HashMap<String, Object>();
 				cond.put("id", uploadFileId);
 

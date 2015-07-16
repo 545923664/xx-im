@@ -1,4 +1,4 @@
-package com.jzwl.instant;
+package com.jzwl.instant.service.impl;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -6,10 +6,15 @@ import java.util.Map;
 
 import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.session.IoSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.jzwl.base.service.MongoService;
 import com.jzwl.base.service.RedisService;
 import com.jzwl.instant.pojo.MyMessage;
+import com.jzwl.instant.service.SendService;
+import com.jzwl.instant.service.SessionService;
+import com.jzwl.instant.service.UserService;
 import com.jzwl.instant.util.IC;
 import com.jzwl.instant.util.L;
 
@@ -19,12 +24,26 @@ import com.jzwl.instant.util.L;
  * @author xx
  * 
  */
-public class SessionManager {
-	public static final Map<String, IoSession> usersMap = Collections
+@Component
+public class SessionServiceImpl implements SessionService {
+
+	@Autowired
+	private RedisService redisService;
+
+	@Autowired
+	private MongoService mongoService;
+
+	@Autowired
+	private UserService userService;
+
+	@Autowired
+	private SendService sendService;
+
+	public final Map<String, IoSession> usersMap = Collections
 			.synchronizedMap(new HashMap<String, IoSession>());
 
 	// 检查session是否可用
-	public static boolean isAvaible(IoSession session) {
+	public boolean isAvaible(IoSession session) {
 
 		if (null != session && session.isConnected()) {
 			return true;
@@ -34,35 +53,35 @@ public class SessionManager {
 	}
 
 	// 加入状态
-	public static void join(RedisService redisService, MongoService mongoService, String username,
-			IoSession newSession, MyMessage msg) {
+	public void join(String username, IoSession newSession, MyMessage msg) {
 
 		usersMap.put(username, newSession);
-		
-		//保存用户信息
-		UserManager.setUserInfo(redisService, mongoService,username, newSession, msg);
+
+		// 保存用户信息
+		userService.setUserInfo(username, newSession, msg);
 
 		if (IC.ON_OFF_LINE_BROCAST) {
-			SendMessage.sendSystemMessage(redisService,
-					SendMessage.sys_on_brocast, username);
+			sendService.sendSystemOnlineInfoMessage(SendService.sys_on_brocast,
+					username);
 		}
 
 		L.out("<<<<<<<<<<<<<<<<<<<<<<<<<加入成功");
 	}
 
 	// 断线
-	public static void disConnect(String username) {
+	public void disConnect(String username) {
 		IoSession dirtySession = getSession(username);
 		if (isAvaible(dirtySession)) {
 			L.out(">>>>>>>>>>>>>>>>>>>需要断开一个可用session"
 					+ dirtySession.toString());
 			dirtySession.close(true);
 			dirtySession = null;
+			usersMap.remove(username);
 		}
 	}
 
 	// 通过username查找session
-	public static IoSession getSession(String username) {
+	public IoSession getSession(String username) {
 		if (usersMap.containsKey(username)) {
 			return usersMap.get(username);
 		} else {
@@ -75,7 +94,7 @@ public class SessionManager {
 	// 0=正常
 	// 1=不存在
 	// 2=存在不可用
-	public static int check(String username) {
+	public int check(String username) {
 		if (usersMap.containsKey(username)) {// 已经连接成
 			IoSession oldSession = usersMap.get(username);
 			if (!isAvaible(oldSession)) {// 检查是否可用
@@ -98,14 +117,12 @@ public class SessionManager {
 	 * @param txt
 	 * @return boolean
 	 */
-	public static boolean write(String username, String txt) {
+	public boolean write(String username, String txt) {
 		try {
 
 			IoSession session = getSession(username);
 
 			if (isAvaible(session)) {
-
-				// setSessionAttribute(session, username);
 
 				WriteFuture future = session.write(txt);
 
@@ -120,7 +137,7 @@ public class SessionManager {
 					return false;
 				}
 			} else {
-				L.out(">>>>>>>>>>>>>>>>>>>session no avaible");
+				L.out(">>>>>>>>>>>>>>>>>>>write faile");
 				return false;
 			}
 
@@ -136,13 +153,13 @@ public class SessionManager {
 	 * @param session
 	 * @param username
 	 */
-	public static void setSessionAttribute(IoSession session, String username) {
+	public void setSessionAttribute(IoSession session, String username) {
 		if (null != session) {
 			session.setAttribute("username", username);
 		}
 	}
 
-	public static boolean isPing(IoSession session, String username) {
+	public boolean isPing(IoSession session, String username) {
 		MyMessage msg = new MyMessage();
 
 		msg.setModel(IC.PING);

@@ -17,7 +17,9 @@ public class MyMessage implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public MyMessage() {
-		this.msgid = Util.getUUID();
+		if (null == this.msgid || "".equals(this.msgid)) {
+			this.msgid = Util.getUUID();
+		}
 	}
 
 	private String msgid;
@@ -26,12 +28,6 @@ public class MyMessage implements Serializable {
 	 * send用户名
 	 */
 	private String username;
-
-	/**
-	 * 来自哪个群
-	 * 
-	 */
-	private String fromGroupId;
 
 	/**
 	 * 用户名
@@ -43,7 +39,7 @@ public class MyMessage implements Serializable {
 	 */
 	private String password;
 	/**
-	 * 类型[login|relogin|chat|brocast|logout]
+	 * 类型[login|system|chat|groupchat
 	 */
 	private String model;
 
@@ -51,11 +47,6 @@ public class MyMessage implements Serializable {
 	 * 消息类型[text|amr|pic][0 1 2]
 	 */
 	private String messageType;
-
-	/**
-	 * 聊天类型[单聊0；群聊1]
-	 */
-	private String chatType;
 
 	/**
 	 * 消息内容
@@ -158,28 +149,12 @@ public class MyMessage implements Serializable {
 		this.msgid = msgid;
 	}
 
-	public String getFromGroupId() {
-		return fromGroupId;
-	}
-
-	public void setFromGroupId(String fromGroupId) {
-		this.fromGroupId = fromGroupId;
-	}
-
 	public String getMessageType() {
 		return messageType;
 	}
 
 	public void setMessageType(String messageType) {
 		this.messageType = messageType;
-	}
-
-	public String getChatType() {
-		return chatType;
-	}
-
-	public void setChatType(String chatType) {
-		this.chatType = chatType;
 	}
 
 	public Map<String, String> getExt() {

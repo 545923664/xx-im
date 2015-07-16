@@ -25,30 +25,28 @@ public class Util {
 	public static synchronized String getRandomUUId() {
 		return UUID.randomUUID().toString();
 	}
-	
+
 	public static void main(String[] args) {
-//		System.out.println(getUUID());
-//		System.out.println(System.currentTimeMillis());
-//		System.out.println((Math.random()*1000+"").split("\\.")[0]);
-		
-		Random fu=new Random();
-        Random yu=new Random();
-        for(int i=1;i<500;i++)
-        {
-            int a=fu.nextInt((97)+25);
-            int b=yu.nextInt((97)+25);
-            if((a==97)||(a==101)||(a==105)||(a==111)||(a==117))
-            {
-                if((b!=97)||(b!=101)||(b!=105)||(b!=111)||(b!=117))
-                {
-                    if(b>=97)
-                    {
-                        System.out.print((char)b);
-                        System.out.print((char)a);
-                    }
-                }
-            }
-        }
+		// System.out.println(getUUID());
+		// System.out.println(System.currentTimeMillis());
+		// System.out.println((Math.random()*1000+"").split("\\.")[0]);
+
+		Random fu = new Random();
+		Random yu = new Random();
+		for (int i = 1; i < 500; i++) {
+			int a = fu.nextInt((97) + 25);
+			int b = yu.nextInt((97) + 25);
+			if ((a == 97) || (a == 101) || (a == 105) || (a == 111)
+					|| (a == 117)) {
+				if ((b != 97) || (b != 101) || (b != 105) || (b != 111)
+						|| (b != 117)) {
+					if (b >= 97) {
+						System.out.print((char) b);
+						System.out.print((char) a);
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -138,7 +136,6 @@ public class Util {
 		}
 		return Integer.parseInt(temp);
 	}
-
 
 	/**
 	 * 浮点型数据截取函敄1�7
@@ -230,6 +227,7 @@ public class Util {
 		return dateFormat.format(date);
 	}
 
+
 	/**
 	 * 格式化日朄1�7
 	 * 
@@ -282,7 +280,6 @@ public class Util {
 		fileSizeString = df.format((double) fileS / 1024)/* + "K" */;
 		return fileSizeString;
 	}
-
 
 	/**
 	 * 功能:验证是否是数孄1�7

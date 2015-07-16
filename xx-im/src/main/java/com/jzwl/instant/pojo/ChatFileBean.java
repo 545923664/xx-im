@@ -2,13 +2,22 @@ package com.jzwl.instant.pojo;
 
 /**
  * 聊天过程中产生的文件信息
+ * 
  * @author Administrator
- *
+ * 
  */
 public class ChatFileBean {
 	private String id;
+
 	private String fileName;
+
 	private String realPath;
+
+	/**
+	 * 访问url
+	 */
+	private String accessUrl;
+
 	private String uploadUserName;
 	private String uploadDate;
 
@@ -50,6 +59,14 @@ public class ChatFileBean {
 
 	public void setUploadDate(String uploadDate) {
 		this.uploadDate = uploadDate;
+	}
+
+	public String getAccessUrl() {
+		return accessUrl;
+	}
+
+	public void setAccessUrl(String accessUrl) {
+		this.accessUrl = accessUrl;
 	}
 
 }

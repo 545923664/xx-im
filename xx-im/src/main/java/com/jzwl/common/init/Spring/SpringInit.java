@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jzwl.base.service.MongoService;
 import com.jzwl.base.service.RedisService;
-import com.jzwl.instant.Bootstarp;
+import com.jzwl.instant.service.BootstarpService;
 
 public class SpringInit implements InitializingBean, DisposableBean {
 
@@ -18,6 +18,9 @@ public class SpringInit implements InitializingBean, DisposableBean {
 
 	@Autowired
 	private MongoService mongoService;
+
+	@Autowired
+	private BootstarpService bootstarpService;
 
 	public void InitAndDestroySeqBean() {
 		System.out.println("执行InitAndDestroySeqBean: 构造方法");
@@ -40,7 +43,7 @@ public class SpringInit implements InitializingBean, DisposableBean {
 		new Thread() {
 			@Override
 			public void run() {
-				Bootstarp.start(redisService, mongoService, 10000l);
+				bootstarpService.start(10000l);
 
 			}
 		}.start();

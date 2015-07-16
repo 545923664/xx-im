@@ -3,6 +3,7 @@ package com.jzwl.instant.controller;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,15 +21,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.google.gson.Gson;
 import com.jzwl.base.service.MongoService;
 import com.jzwl.base.service.RedisService;
-import com.jzwl.instant.FriendManager;
-import com.jzwl.instant.MinaCoreService;
-import com.jzwl.instant.SessionManager;
-import com.jzwl.instant.UserManager;
-import com.jzwl.instant.pojo.MyMessage;
+import com.jzwl.instant.pojo.FormatJsonResult;
+import com.jzwl.instant.pojo.GroupInfo;
 import com.jzwl.instant.pojo.UserInfo;
+import com.jzwl.instant.service.impl.FriendServiceImpl;
+import com.jzwl.instant.service.impl.GroupServiceImpl;
+import com.jzwl.instant.service.impl.SendServiceImpl;
+import com.jzwl.instant.service.impl.SessionServiceImpl;
+import com.jzwl.instant.service.impl.UserServiceImpl;
 import com.jzwl.instant.util.IC;
 import com.jzwl.instant.util.JsonTool;
-import com.jzwl.instant.util.Util;
 
 @Controller
 @RequestMapping("/chat")
@@ -38,13 +40,23 @@ public class ChatController {
 
 	private Gson gson = new Gson();
 
-	private MinaCoreService minaCoreService = new MinaCoreService(null);
-
 	@Autowired
 	private RedisService redisService;
 
 	@Autowired
 	private MongoService mongoService;
+
+	@Autowired
+	private GroupServiceImpl groupServiceImpl;
+	@Autowired
+	private UserServiceImpl userServiceImpl;
+	@Autowired
+	private SessionServiceImpl sessionServiceImpl;
+	@Autowired
+	private FriendServiceImpl friendServiceImpl;
+
+	@Autowired
+	private SendServiceImpl sendServiceImpl;
 
 	/**
 	 * 获取在线用户列表
@@ -59,20 +71,19 @@ public class ChatController {
 
 			String uid = request.getParameter("uid");
 
-			Set<String> keys = SessionManager.usersMap.keySet();
+			Set<String> keys = sessionServiceImpl.usersMap.keySet();
 
 			Map<String, UserInfo> temp = new HashMap<String, UserInfo>();
 
-			List<String> friendIDList = new ArrayList<String>();
+			Set<String> friendIDList = new HashSet<String>();
 
 			// 先获取好友
 			if (null != uid) {
-				friendIDList = FriendManager.getFriendList(uid, mongoService);
+				friendIDList = friendServiceImpl.getFriendList(uid);
 			}
 
 			for (String fid : friendIDList) {
-				UserInfo user = UserManager
-						.getUserInfoFromDB(mongoService, fid);
+				UserInfo user = userServiceImpl.getUserInfoFromDB(fid);
 
 				if (null != user) {
 					user.setIsFriend("1");
@@ -80,20 +91,19 @@ public class ChatController {
 				}
 			}
 
-			// 获取在线用户
+			// 获取在线用户[未来会删掉]
 			for (String username : keys) {
 
-				IoSession session = SessionManager.usersMap.get(username);
+				IoSession session = sessionServiceImpl.usersMap.get(username);
 
-				if (SessionManager.isAvaible(session)) {
+				if (sessionServiceImpl.isAvaible(session)) {
 
-					if (null != temp.get(username)) {//已经是好友则添加在线状态
+					if (null != temp.get(username)) {// 已经是好友则添加在线状态
 						UserInfo user = temp.get(username);
 						user.setIsOnline("1");
 						temp.put(username, user);
-					} else {//不是好友说明在线状态即可
-						UserInfo user = UserManager.getUserInfo(redisService,
-								username);
+					} else {// 不是好友说明在线状态即可
+						UserInfo user = userServiceImpl.getUserInfo(username);
 
 						if (null != user) {
 							user.setIsOnline("1");
@@ -123,6 +133,104 @@ public class ChatController {
 	}
 
 	/**
+	 * 获取在线系想你
+	 * 
+	 * @param request
+	 * @param response
+	 */
+	@RequestMapping(value = "/getOnlineInfo")
+	public void getOnlineInfo(HttpServletRequest request,
+			HttpServletResponse response) {
+
+		FormatJsonResult fjr = new FormatJsonResult();
+
+		try {
+
+			String username = request.getParameter("username");
+
+			Set<String> keys = sessionServiceImpl.usersMap.keySet();
+
+			Map<String, UserInfo> temp = new HashMap<String, UserInfo>();
+
+			Set<String> friendIDList = new HashSet<String>();
+
+			List<GroupInfo> groupList = new ArrayList<GroupInfo>();
+
+			// 先获取好友|群
+			if (null != username) {
+				friendIDList = friendServiceImpl.getFriendList(username);
+				groupList = userServiceImpl.getUserGroupInfo(username);
+			}
+
+			if (null != friendIDList) {
+
+				for (String fid : friendIDList) {
+
+					UserInfo user = userServiceImpl.getUserInfoFromDB(fid);
+
+					if (null != user) {
+						user.setIsFriend("1");
+						temp.put(fid, user);
+					}
+				}
+			}
+
+			// 获取在线用户[未来会删掉]
+			for (String uid : keys) {
+
+				IoSession session = sessionServiceImpl.usersMap.get(uid);
+
+				if (sessionServiceImpl.isAvaible(session)) {
+
+					if (null != temp.get(uid)) {// 已经是好友则添加在线状态
+						UserInfo user = temp.get(uid);
+						user.setIsOnline("1");
+						temp.put(uid, user);
+					} else {// 不是好友说明在线状态即可
+						UserInfo user = userServiceImpl.getUserInfo(uid);
+
+						if (null != user) {
+							user.setIsOnline("1");
+							temp.put(uid, user);
+						}
+					}
+
+				}
+
+			}
+
+			// 合并
+			Set<String> ids = temp.keySet();
+
+			// 好友列表
+			List<UserInfo> userList = new ArrayList<UserInfo>();
+
+			for (String uid : ids) {
+				userList.add(temp.get(uid));
+			}
+
+			Map<String, Object> res = new HashMap<String, Object>();
+
+			res.put("user", userList);
+			res.put("group", groupList);
+
+			fjr.setFlag(1);
+			fjr.setCtrl("");
+			fjr.setMap(res);
+
+			JsonTool.printMsg(response, gson.toJson(fjr));
+
+		} catch (Exception e) {
+			fjr.setFlag(0);
+			fjr.setCtrl("t");
+			fjr.setMessage(e.getMessage());
+
+			JsonTool.printMsg(response, gson.toJson(fjr));
+			e.printStackTrace();
+		}
+	}
+
+	/**
 	 * 获取远程配置参数
 	 */
 	@RequestMapping(value = "/getClientConfig")
@@ -131,69 +239,24 @@ public class ChatController {
 
 		Map<String, String> config = new HashMap<String, String>();
 		config.put("serverAddress", IC.server_connect_address);// 服务器连接地址
-		config.put("username", System.currentTimeMillis() + "");// 用户标示符
-		// config.put("nickname", ChinaNameUtil.getSimpleName());// 用户昵称
-		config.put("nickname", "guest");// 用户昵称
+		config.put("username", "5459");// 用户标示符
+		config.put("nickname", "5459");// 用户昵称
 
 		JsonTool.printMsg(response, gson.toJson(config));
 
 	}
 
-
-	@RequestMapping(value = "/sendMsg.html")
-	public void sendMsg(HttpServletRequest request, HttpServletResponse response) {
-		try {
-			String sendMsg = request.getParameter("sendMsg");
-			String tousername = request.getParameter("tousername");
-
-			if (null != tousername && null != sendMsg) {
-				MyMessage myMessage = new MyMessage();
-				myMessage.setModel(IC.BROCAST);
-				myMessage.setMessage(sendMsg);
-				myMessage.setTousername(tousername);
-				myMessage.setUsername("#system#");
-
-				myMessage.setDate(Util.getCurrDate());
-
-				minaCoreService.controlChatMessage(myMessage);
-			}
-
-			String json = JsonTool.getObjectJson(true, "success");
-			JsonTool.printMsg(response, json);
-
-		} catch (Exception e) {
-			JsonTool.printMsg(response, "发送失败");
-			e.printStackTrace();
-		}
-	}
-
-	@RequestMapping(value = "/closeConnect")
-	public void closeConnect(HttpServletRequest request,
-			HttpServletResponse response) {
-		try {
-			String tousername = request.getParameter("username");
-
-			if (null != tousername) {
-				minaCoreService.closeConnect4username(tousername);
-			}
-
-		} catch (Exception e) {
-			JsonTool.printMsg(response, "发送失败");
-			e.printStackTrace();
-		}
-	}
-
 	@RequestMapping(value = "/test")
 	public void test(HttpServletRequest request, HttpServletResponse response) {
 		try {
-			Set<String> keys = SessionManager.usersMap.keySet();
+			Set<String> keys = sessionServiceImpl.usersMap.keySet();
 
 			ArrayList<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 
 			for (String key : keys) {
 				Map<String, Object> map = new HashMap<String, Object>();
 
-				map.put(key, SessionManager.usersMap.get(key).isConnected());
+				map.put(key, sessionServiceImpl.usersMap.get(key).isConnected());
 
 				list.add(map);
 			}

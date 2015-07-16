@@ -1,5 +1,6 @@
 package com.jzwl.instant.controller;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLDecoder;
 
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.jzwl.base.service.MongoService;
+import com.jzwl.instant.util.L;
 import com.jzwl.instant.util.UploadDownUtil;
 
 @Controller
@@ -27,14 +29,15 @@ public class ChatFileController {
 	@RequestMapping(value = "/fileUpload")
 	public void chatFileUpload(HttpServletRequest request,
 			HttpServletResponse response) {
-
 		try {
+
 			String username = request.getParameter("userInfo");
+
+			L.out(username);
+
 			username = URLDecoder.decode(username, "UTF-8");
 			String fileName = request.getParameter("fileName");
 			fileName = URLDecoder.decode(fileName, "UTF-8");
-			// String fileType = request.getParameter("fileType");
-			// fileType = URLDecoder.decode(fileType, "UTF-8");
 
 			String fileUploadId = UploadDownUtil.fileUpload(mongoService,
 					request, username, fileName, "fileType");
@@ -55,11 +58,21 @@ public class ChatFileController {
 
 			log.error("has upload file <<" + fileUploadId);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			log.error(e.getMessage());
+
+			PrintWriter out;
+			try {
+				out = response.getWriter();
+				out.print(e.getMessage());
+				out.flush();
+				out.close();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+
 			e.printStackTrace();
 		}
 	}
+
 
 	@RequestMapping(value = "/fileDownLoad")
 	public void chatFileDownLoad(HttpServletRequest request,
@@ -73,9 +86,9 @@ public class ChatFileController {
 
 			// boolean flag = UploadDownUtil.fileDownLoad(response, request,
 			// username, fileName);
-			boolean flag = UploadDownUtil.fileDownLoad4fid(mongoService,response, request,
-					username, fileName);
-			
+			boolean flag = UploadDownUtil.fileDownLoad4fid(mongoService,
+					response, request, username, fileName);
+
 			log.error("user file down" + username + "-" + fileName + "-" + flag);
 		} catch (Exception e) {
 			log.error(e.getMessage());

@@ -66,6 +66,9 @@ public class TestController extends BaseController {
 		
 		System.out.println(mongoService.find("school").size());
 		
+		
+		
+		
 
 	}
 }

@@ -26,8 +26,14 @@ public class IC {
 	public static final String send_faile_times_key = redis_root + "sed.faile";
 
 	// redis 用户信息key
-	public static final String user_info_key = redis_root + "user.info";
+	public static final String user_simple_info_key = redis_root + "user.info";
 
+	//redis 创建群key
+	public static final String user_create_group_key = redis_root + "create.group";
+
+		
+	
+	
 	// mongo传输的消息
 	public static final String mongodb_message = "message";
 
@@ -37,11 +43,12 @@ public class IC {
 	// mongo传输的文件
 	public static final String mongodb_fileinfo = "message_fileinfo";
 
-	// mongo好友关系
-	public static final String mongodb_friendinfo = "friend_info";
 	
-	//用户信息
+	//mongo用户信息
 	public static final String mongodb_userinfo = "user_info";
+
+	//mongo群信息
+	public static final String mongodb_groupinfo = "group_info";
 
 	
 	/**
@@ -55,10 +62,17 @@ public class IC {
 	public static final String LOGIN = "login";
 
 	/**
-	 * 聊天消息发送
+	 * 单聊
 	 */
 	public static final String CHAT = "chat";
 
+	
+	/**
+	 * 群聊
+	 */
+	public static final String GROUP_CHAT = "groupchat";
+
+	
 	/**
 	 * ping pong
 	 */
@@ -73,11 +87,42 @@ public class IC {
 	 * 添加好友
 	 */
 	public static final String ACTION_ADD_FRIEND = "addfriend";
+	
+	
+	/**
+	 * 删除好友
+	 */
+	public static final String ACTION_DEL_FRIEND = "delfriend";
 
 	/**
-	 * 同意申请
+	 * 同意好友申请
 	 */
 	public static final String ACTION_AGREE_FRIEND = "agreefriend";
+	
+	/**
+	 * 不同意好友申请
+	 */
+	public static final String ACTION_NOT_AGREE_FRIEND = "notagreefriend";
+	
+	/**
+	 * 申请入群
+	 */
+	public static final String ACTION_APPLY_GROUP= "applygroup";
+	
+	/**
+	 * 同意入群
+	 */
+	public static final String ACTION_AGREE_GROUP= "agreegroup";
+	
+	
+	/**
+	 * 不同意入群
+	 */
+	public static final String ACTION_NOT_AGREE_GROUP= "notagreegroup";
+	
+	
+	
+
 
 	/**
 	 * 系统消息

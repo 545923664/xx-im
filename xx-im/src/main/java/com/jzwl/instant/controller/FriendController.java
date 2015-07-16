@@ -3,7 +3,6 @@ package com.jzwl.instant.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +12,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.google.gson.Gson;
 import com.jzwl.base.service.MongoService;
 import com.jzwl.base.service.RedisService;
-import com.jzwl.instant.FriendManager;
-import com.jzwl.instant.MessageManager;
-import com.jzwl.instant.SessionManager;
 import com.jzwl.instant.pojo.FormatJsonResult;
 import com.jzwl.instant.pojo.MyMessage;
+import com.jzwl.instant.service.impl.FriendServiceImpl;
+import com.jzwl.instant.service.impl.GroupServiceImpl;
+import com.jzwl.instant.service.impl.MessageServiceImpl;
+import com.jzwl.instant.service.impl.SendServiceImpl;
+import com.jzwl.instant.service.impl.SessionServiceImpl;
+import com.jzwl.instant.service.impl.UserServiceImpl;
 import com.jzwl.instant.util.IC;
 import com.jzwl.instant.util.JsonTool;
 
@@ -34,6 +36,19 @@ public class FriendController {
 
 	@Autowired
 	private MongoService mongoService;
+
+	@Autowired
+	private GroupServiceImpl groupServiceImpl;
+	@Autowired
+	private UserServiceImpl userServiceImpl;
+	@Autowired
+	private SessionServiceImpl sessionServiceImpl;
+	@Autowired
+	private FriendServiceImpl friendServiceImpl;
+	@Autowired
+	private MessageServiceImpl messageServiceImpl;
+	@Autowired
+	private SendServiceImpl sendServiceImpl;
 
 	/**
 	 * 请求添加对方为好友
@@ -54,40 +69,26 @@ public class FriendController {
 			String destNickName = request.getParameter("dest_nickname");
 			if (null != username && null != destUsername) {
 
-				IoSession destSession = SessionManager.getSession(destUsername);
+				MyMessage message = new MyMessage();
 
-				if (SessionManager.isAvaible(destSession)) {
+				message.setModel(IC.SYS);
 
-					MyMessage message = new MyMessage();
+				message.setUsername(username);
 
-					message.setModel(IC.SYS);
+				message.setTousername(destUsername);
 
-					message.setUsername(username);
+				message.setMessage(destNickName + "你好[" + userNickName
+						+ "]要加您为好友是否同意");
 
-					message.setTousername(destUsername);
+				message.putExtKey("action", IC.ACTION_ADD_FRIEND);
 
-					message.setMessage(destNickName + "你好[" + userNickName
-							+ "]要加您为好友是否同意");
+				messageServiceImpl.joinSendQueue(gson.toJson(message));
 
-					message.putExtKey("action",
-							IC.ACTION_ADD_FRIEND);
+				fjr.setFlag(1);
+				fjr.setCtrl("t");
+				fjr.setMessage("已经发送了请求，等待对方验证");
 
-					MessageManager.joinSendQueue(redisService,
-							gson.toJson(message));
-
-					fjr.setFlag(1);
-					fjr.setCtrl("t");
-					fjr.setMessage("已经发送了请求，等待对方验证");
-
-					JsonTool.printMsg(response, gson.toJson(fjr));
-
-				} else {
-					fjr.setFlag(0);
-					fjr.setCtrl("t");
-					fjr.setMessage("对方不在线或者已经失去连接，请稍后再试");
-
-					JsonTool.printMsg(response, gson.toJson(fjr));
-				}
+				JsonTool.printMsg(response, gson.toJson(fjr));
 
 			} else {
 
@@ -110,7 +111,66 @@ public class FriendController {
 	}
 
 	/**
-	 * 请求添加对方为好友
+	 * 解除好友关系
+	 * 
+	 * @param request
+	 * @param response
+	 */
+	@RequestMapping(value = "/delFriend")
+	public void delFriend(HttpServletRequest request,
+			HttpServletResponse response) {
+		FormatJsonResult fjr = null;
+
+		try {
+
+			String username = request.getParameter("username");// 发起人
+			String userNickName = request.getParameter("user_nickname");
+
+			String destUsername = request.getParameter("dest_username");// 目标
+			String destNickName = request.getParameter("dest_nickname");
+
+			if (null != username && null != destUsername) {
+
+				MyMessage message = new MyMessage();
+
+				message.setModel(IC.SYS);
+
+				message.setUsername(username);
+
+				message.setTousername(destUsername);
+
+				message.setMessage(destNickName + "你好[" + userNickName
+						+ "]已经把你这个逗比删除了！");
+
+				message.putExtKey("action", IC.ACTION_DEL_FRIEND);
+
+				messageServiceImpl.joinSendQueue(gson.toJson(message));
+
+				// 删除好友关系
+				friendServiceImpl.delFriend(username, destUsername);
+				// 双向
+				friendServiceImpl.delFriend(destUsername, username);
+
+				fjr = new FormatJsonResult(1, "目标已删除", "t", null, null);
+
+			} else {
+
+				fjr = new FormatJsonResult(0, "参数错误", "t", null, null);
+
+			}
+			JsonTool.printMsg(response, gson.toJson(fjr));
+
+		} catch (Exception e) {
+
+			fjr = new FormatJsonResult(0, e.getMessage(), "t", null, null);
+
+			JsonTool.printMsg(response, gson.toJson(fjr));
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 同意加对方为好友
 	 * 
 	 * @param request
 	 * @param response
@@ -130,50 +190,42 @@ public class FriendController {
 
 			if (null != username && null != destUsername) {
 
-				IoSession destSession = SessionManager.getSession(destUsername);
+				MyMessage message = new MyMessage();
 
-				if (SessionManager.isAvaible(destSession)) {
+				message.setModel(IC.SYS);
 
-					MyMessage message = new MyMessage();
+				message.setUsername(username);
 
-					message.setModel(IC.SYS);
+				message.setTousername(destUsername);
 
-					message.setUsername(username);
+				fjr.setFlag(1);
+				fjr.setCtrl("t");
 
-					message.setTousername(destUsername);
+				if ("1".equals(isAgreen)) {// 同意
 
-					message.putExtKey("action",
-							IC.ACTION_AGREE_FRIEND);
+					message.putExtKey("action", IC.ACTION_AGREE_FRIEND);
 
-					fjr.setFlag(1);
-					fjr.setCtrl("t");
+					message.setMessage(destNickName + "你好[" + userNickName
+							+ "]同意了您的好友邀请，现在你们可以聊天了");
+					fjr.setMessage("您已经同意了" + destNickName + "的申请");
 
-					if ("1".equals(isAgreen)) {// 同意
-						message.setMessage(destNickName + "你好[" + userNickName
-								+ "]同意了您的好友邀请，现在你们可以聊天了");
-						fjr.setMessage("您已经同意了" + destNickName + "的申请");
+					// 建立好友关系
+					friendServiceImpl.addFriend(username, destUsername);
+					// 双向
+					friendServiceImpl.addFriend(destUsername, username);
 
-						// 建立好友关系
-						FriendManager.addFriend(username, destUsername,
-								mongoService);
+				} else {// 拒绝
 
-					} else {
-						message.setMessage(destNickName + "你好[" + userNickName
-								+ "]没有同意你的好友申请");
-						fjr.setMessage("您已拒绝了" + destNickName + "的申请");
-					}
+					message.putExtKey("action", IC.ACTION_NOT_AGREE_FRIEND);
 
-					MessageManager.joinSendQueue(redisService,
-							gson.toJson(message));
-					JsonTool.printMsg(response, gson.toJson(fjr));
-
-				} else {
-					fjr.setFlag(0);
-					fjr.setCtrl("t");
-					fjr.setMessage("对方不在线或者已经失去连接，请稍后再试");
-
-					JsonTool.printMsg(response, gson.toJson(fjr));
+					message.setMessage(destNickName + "你好[" + userNickName
+							+ "]没有同意你的好友申请");
+					fjr.setMessage("您已拒绝了" + destNickName + "的申请");
 				}
+
+				messageServiceImpl.joinSendQueue(gson.toJson(message));
+
+				JsonTool.printMsg(response, gson.toJson(fjr));
 
 			} else {
 

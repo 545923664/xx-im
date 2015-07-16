@@ -1,9 +1,16 @@
-package com.jzwl.instant;
+package com.jzwl.instant.service.impl;
+
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
-import com.jzwl.base.service.MongoService;
-import com.jzwl.base.service.RedisService;
+import com.jzwl.instant.pojo.GroupInfo;
 import com.jzwl.instant.pojo.MyMessage;
+import com.jzwl.instant.service.GroupService;
+import com.jzwl.instant.service.MessageService;
+import com.jzwl.instant.service.RecieveService;
 import com.jzwl.instant.util.IC;
 import com.jzwl.instant.util.L;
 
@@ -13,13 +20,19 @@ import com.jzwl.instant.util.L;
  * @author Administrator
  * 
  */
-public class RecieveMessage {
+@Component
+public class RecieveServiceImpl implements RecieveService {
 
 	private static Gson gson = new Gson();
 
+	@Autowired
+	private GroupService groupService;
+
+	@Autowired
+	private MessageService messageService;
+
 	// 接受并保存消息
-	public static void receive(String json, RedisService redisService,
-			MongoService mongoService) {
+	public void receive(String json) {
 
 		try {
 			MyMessage msg = gson.fromJson(json, MyMessage.class);
@@ -32,30 +45,37 @@ public class RecieveMessage {
 
 				String res = gson.toJson(msg);
 
-				MessageManager.joinSendQueue(redisService, res);
+				messageService.joinSendQueue(res);
+				// 登陆完成后推送离线
+				messageService.sendLeaveMessage(username);
 
-			} else if (IC.CHAT.equals(model)) {// 聊天
+			} else if (IC.CHAT.equals(model)) {// 单聊
+				messageService.joinSendQueue(json);
 
-				String fromGroupId = msg.getFromGroupId();
+			} else if (IC.GROUP_CHAT.equals(model)) {// 群聊
+				// 进行分发
+				String fromGroupId = msg.getExtValue("fromGroupId");
 
-				// is group
-				if (null != fromGroupId && !"".equals(fromGroupId.trim())) {
+				GroupInfo group = groupService.getGroupInfo(fromGroupId);
 
-					// List<String> userIdList = new ArrayList<String>();
-					// group
+				Set<String> member = group.getMember();
 
-					// minaCoreService.controlChatMessage(msg);
+				for (String destUsername : member) {
 
-				} else {
-					// is single
-					MessageManager.joinSendQueue(redisService, json);
+					if (!username.equals(destUsername)) {// 不能发给自己
+
+						msg.setTousername(destUsername);
+
+						messageService.joinSendQueue(gson.toJson(msg));
+					}
+
 				}
 
 			} else if (IC.PING.equals(model)) {// ping
 
 				msg.setMessage("pong");
 
-				MessageManager.joinSendQueue(redisService, gson.toJson(msg));
+				messageService.joinSendQueue(gson.toJson(msg));
 
 			} else if (IC.RELOGIN.equals(model)) {// 断线重连
 				// if client user'session is close and relogin

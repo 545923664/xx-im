@@ -10,15 +10,30 @@ import java.util.Map;
  */
 public class FormatJsonResult {
 
+	public FormatJsonResult() {
+
+	}
+
+	public FormatJsonResult(int flag, String message, String ctrl,
+			List<Object> list, Map<String, Object> map) {
+		
+		this.flag = flag;
+		this.message=message;
+		this.ctrl = ctrl;
+		this.list = list;
+		this.map = map;
+
+	}
+
 	// 判断请求是否成功
-	//1代表成功
+	// 1代表成功
 	private int flag = 1;
 
 	private String message = "";
 
 	private List<Object> list;
 
-	private Map<String, String> map;
+	private Map<String, Object> map;
 
 	// ------客户端对应处理----
 	// t=toast | a=alert
@@ -48,11 +63,11 @@ public class FormatJsonResult {
 		this.list = list;
 	}
 
-	public Map<String, String> getMap() {
+	public Map<String, Object> getMap() {
 		return map;
 	}
 
-	public void setMap(Map<String, String> map) {
+	public void setMap(Map<String, Object> map) {
 		this.map = map;
 	}
 

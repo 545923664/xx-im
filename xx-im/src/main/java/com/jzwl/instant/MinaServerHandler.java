@@ -1,6 +1,7 @@
 package com.jzwl.instant;
 
 import org.apache.mina.core.service.IoHandlerAdapter;
+import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,24 +11,41 @@ import com.google.gson.Gson;
 import com.jzwl.base.service.MongoService;
 import com.jzwl.base.service.RedisService;
 import com.jzwl.instant.pojo.MyMessage;
+import com.jzwl.instant.pojo.UserInfo;
+import com.jzwl.instant.service.BootstarpService;
+import com.jzwl.instant.service.MessageService;
+import com.jzwl.instant.service.SendService;
+import com.jzwl.instant.service.SessionService;
+import com.jzwl.instant.service.UserService;
 import com.jzwl.instant.util.IC;
 import com.jzwl.instant.util.L;
 
 public class MinaServerHandler extends IoHandlerAdapter {
-	private final static Logger LOGGER = LoggerFactory
-			.getLogger(MinaServerHandler.class);
 
 	Logger log = LoggerFactory.getLogger(MinaServerHandler.class);
 
 	private Gson gson = new Gson();
-
-	private int test = 0;
 
 	@Autowired
 	private RedisService redisService;
 
 	@Autowired
 	private MongoService mongoService;
+
+	@Autowired
+	private BootstarpService bootstarpService;
+
+	@Autowired
+	private UserService userService;
+
+	@Autowired
+	private SessionService sessionService;
+
+	@Autowired
+	private MessageService messageService;
+
+	@Autowired
+	private SendService sendService;
 
 	@Override
 	public void messageReceived(IoSession currentSession, Object message) {
@@ -44,7 +62,7 @@ public class MinaServerHandler extends IoHandlerAdapter {
 			if (null != username && null != model) {// 判断登陆状态
 
 				// 检查发送者session状态
-				int userStatus = SessionManager.check(username);
+				int userStatus = sessionService.check(username);
 
 				String statusUserInfo = "";
 				if (userStatus == 0) {
@@ -58,26 +76,21 @@ public class MinaServerHandler extends IoHandlerAdapter {
 
 				if (IC.LOGIN.equals(model)) {// 登陆模块
 					// 加入服务器
-					SessionManager.join(redisService, mongoService, username,
-							currentSession, msg);
-					// 登陆需要插队到最前面
-					MessageManager.joinCtrlQueue(redisService, json);
-					// 登陆完成后推送离线
-					MessageManager.sendLeaveMessage(username, redisService,
-							mongoService);
+					sessionService.join(username, currentSession, msg);
+					// 登陆
+					messageService.joinCtrlQueue(json);
+
 				} else if (IC.CHAT.equals(model)) {// 聊天模块
 					// 检查状态
 					if (userStatus != 0) {// 需要重新加入
-						SessionManager.join(redisService, mongoService,
-								username, currentSession, msg);
+						sessionService.join(username, currentSession, msg);
 						// 登陆完成后推送离线
-						MessageManager.sendLeaveMessage(username, redisService,
-								mongoService);
+						messageService.sendLeaveMessage(username);
 					}
 
 					String toUserName = msg.getTousername();
 
-					int toUserStatus = SessionManager.check(toUserName);
+					int toUserStatus = sessionService.check(toUserName);
 
 					String statusToUserInfo = "";
 					if (toUserStatus == 0) {
@@ -91,56 +104,95 @@ public class MinaServerHandler extends IoHandlerAdapter {
 					L.out("<<<<<<<<<<<<<<<<<<<<<<<<<" + statusToUserInfo);
 
 					if (toUserStatus == 0) {
-						MessageManager.joinCtrlQueue(redisService, json);
+						messageService.joinCtrlQueue(json);
 
 					} else {// 对方不可用，保存离线
-						MessageManager.saveLeavelMessage(mongoService, msg);
+						messageService.saveLeavelMessage(msg);
 
 					}
+				} else if (IC.GROUP_CHAT.equals(model)) {
+					// 检查状态
+					if (userStatus != 0) {// 需要重新加入
+						sessionService.join(username, currentSession, msg);
+						// 登陆完成后推送离线
+						messageService.sendLeaveMessage(username);
+					}
+
+					String fromGroupId = msg.getExtValue("fromGroupId");
+
+					if (null != fromGroupId) {
+						messageService.joinCtrlQueue(json);
+					} else {
+						sendService.sendGroupErrTip(currentSession,
+								"sx fromGroupId is null ! send your sister!");
+					}
+
 				} else if (IC.PING.equals(model)) {// ping
-					MessageManager.joinCtrlQueue(redisService, json);
+					messageService.joinCtrlQueue(json);
 				} else if (IC.SYS.equals(model)) {// 系统信息：添加好友等等
 					// http发送 暂时不做处理
 				}
 
 			} else {
-				SendMessage.sendErrTip(currentSession);
+				sendService.sendErrTip(currentSession);
 			}
 
 		} catch (Exception e) {
 			log.error("<<<mina server handler exc >>>" + e.getMessage());
-			SendMessage.sendErrTip(currentSession);
+			sendService.sendErrTip(currentSession);
 		}
 
 	}
 
 	@Override
 	public void exceptionCaught(IoSession session, Throwable e) {
-		L.out("***************异常" + session.toString());
+		L.out("exceptionCaught|" + session.toString());
 
-		Object username_att = session.getAttribute("username");
+		String address = session.getRemoteAddress().toString();
 
-		if (null != username_att) {
-			String username = username_att.toString();
+		if (null != address) {
+			UserInfo user = userService.getUserInfoFromDBByAddress(address);
 
-			SendMessage.sendSystemMessage(redisService,
-					SendMessage.sys_off_brocast, username);
+			if (null != user) {
+				sendService.sendSystemOnlineInfoMessage(
+						SendService.sys_off_brocast, user.getUsername());
 
+			}
 		}
+
 	}
 
 	@Override
 	public void sessionClosed(IoSession session) throws Exception {
-		L.out("***************关闭" + session.toString());
-		Object username_att = session.getAttribute("username");
+		L.out("sessionClosed|" + session.toString());
 
-		if (null != username_att) {
-			String username = username_att.toString();
+		String address = session.getRemoteAddress().toString();
 
-			SendMessage.sendSystemMessage(redisService,
-					SendMessage.sys_off_brocast, username);
+		if (null != address) {
+			UserInfo user = userService.getUserInfoFromDBByAddress(address);
 
+			if (null != user) {
+				sendService.sendSystemOnlineInfoMessage(
+						sendService.sys_off_brocast, user.getUsername());
+
+			}
 		}
+
+	}
+
+	@Override
+	public void sessionCreated(IoSession session) throws Exception {
+		super.sessionCreated(session);
+		// 开始轮训
+		bootstarpService.busy();
+	}
+
+	@Override
+	public void sessionIdle(IoSession session, IdleStatus status)
+			throws Exception {
+		super.sessionIdle(session, status);
+		// 暂停轮训
+		bootstarpService.idle();
 
 	}
 
