@@ -24,11 +24,11 @@ import com.jzwl.base.service.RedisService;
 import com.jzwl.instant.pojo.FormatJsonResult;
 import com.jzwl.instant.pojo.GroupInfo;
 import com.jzwl.instant.pojo.UserInfo;
-import com.jzwl.instant.service.impl.FriendServiceImpl;
-import com.jzwl.instant.service.impl.GroupServiceImpl;
-import com.jzwl.instant.service.impl.SendServiceImpl;
-import com.jzwl.instant.service.impl.SessionServiceImpl;
-import com.jzwl.instant.service.impl.UserServiceImpl;
+import com.jzwl.instant.service.FriendService;
+import com.jzwl.instant.service.GroupService;
+import com.jzwl.instant.service.SendService;
+import com.jzwl.instant.service.SessionService;
+import com.jzwl.instant.service.UserService;
 import com.jzwl.instant.util.IC;
 import com.jzwl.instant.util.JsonTool;
 
@@ -47,16 +47,16 @@ public class ChatController {
 	private MongoService mongoService;
 
 	@Autowired
-	private GroupServiceImpl groupServiceImpl;
+	private GroupService groupService;
 	@Autowired
-	private UserServiceImpl userServiceImpl;
+	private UserService userService;
 	@Autowired
-	private SessionServiceImpl sessionServiceImpl;
+	private SessionService sessionService;
 	@Autowired
-	private FriendServiceImpl friendServiceImpl;
+	private FriendService friendService;
 
 	@Autowired
-	private SendServiceImpl sendServiceImpl;
+	private SendService sendService;
 
 	/**
 	 * 获取在线用户列表
@@ -71,7 +71,7 @@ public class ChatController {
 
 			String uid = request.getParameter("uid");
 
-			Set<String> keys = sessionServiceImpl.usersMap.keySet();
+			Set<String> keys = SessionService.usersMap.keySet();
 
 			Map<String, UserInfo> temp = new HashMap<String, UserInfo>();
 
@@ -79,11 +79,11 @@ public class ChatController {
 
 			// 先获取好友
 			if (null != uid) {
-				friendIDList = friendServiceImpl.getFriendList(uid);
+				friendIDList = friendService.getFriendList(uid);
 			}
 
 			for (String fid : friendIDList) {
-				UserInfo user = userServiceImpl.getUserInfoFromDB(fid);
+				UserInfo user = userService.getUserInfoFromDB(fid);
 
 				if (null != user) {
 					user.setIsFriend("1");
@@ -94,16 +94,16 @@ public class ChatController {
 			// 获取在线用户[未来会删掉]
 			for (String username : keys) {
 
-				IoSession session = sessionServiceImpl.usersMap.get(username);
+				IoSession session = SessionService.usersMap.get(username);
 
-				if (sessionServiceImpl.isAvaible(session)) {
+				if (sessionService.isAvaible(session)) {
 
 					if (null != temp.get(username)) {// 已经是好友则添加在线状态
 						UserInfo user = temp.get(username);
 						user.setIsOnline("1");
 						temp.put(username, user);
 					} else {// 不是好友说明在线状态即可
-						UserInfo user = userServiceImpl.getUserInfo(username);
+						UserInfo user = userService.getUserInfo(username);
 
 						if (null != user) {
 							user.setIsOnline("1");
@@ -148,7 +148,7 @@ public class ChatController {
 
 			String username = request.getParameter("username");
 
-			Set<String> keys = sessionServiceImpl.usersMap.keySet();
+			Set<String> keys = SessionService.usersMap.keySet();
 
 			Map<String, UserInfo> temp = new HashMap<String, UserInfo>();
 
@@ -158,15 +158,15 @@ public class ChatController {
 
 			// 先获取好友|群
 			if (null != username) {
-				friendIDList = friendServiceImpl.getFriendList(username);
-				groupList = userServiceImpl.getUserGroupInfo(username);
+				friendIDList = friendService.getFriendList(username);
+				groupList = userService.getUserGroupInfo(username);
 			}
 
 			if (null != friendIDList) {
 
 				for (String fid : friendIDList) {
 
-					UserInfo user = userServiceImpl.getUserInfoFromDB(fid);
+					UserInfo user = userService.getUserInfoFromDB(fid);
 
 					if (null != user) {
 						user.setIsFriend("1");
@@ -178,16 +178,16 @@ public class ChatController {
 			// 获取在线用户[未来会删掉]
 			for (String uid : keys) {
 
-				IoSession session = sessionServiceImpl.usersMap.get(uid);
+				IoSession session = SessionService.usersMap.get(uid);
 
-				if (sessionServiceImpl.isAvaible(session)) {
+				if (sessionService.isAvaible(session)) {
 
 					if (null != temp.get(uid)) {// 已经是好友则添加在线状态
 						UserInfo user = temp.get(uid);
 						user.setIsOnline("1");
 						temp.put(uid, user);
 					} else {// 不是好友说明在线状态即可
-						UserInfo user = userServiceImpl.getUserInfo(uid);
+						UserInfo user = userService.getUserInfo(uid);
 
 						if (null != user) {
 							user.setIsOnline("1");
@@ -249,14 +249,14 @@ public class ChatController {
 	@RequestMapping(value = "/test")
 	public void test(HttpServletRequest request, HttpServletResponse response) {
 		try {
-			Set<String> keys = sessionServiceImpl.usersMap.keySet();
+			Set<String> keys = SessionService.usersMap.keySet();
 
 			ArrayList<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 
 			for (String key : keys) {
 				Map<String, Object> map = new HashMap<String, Object>();
 
-				map.put(key, sessionServiceImpl.usersMap.get(key).isConnected());
+				map.put(key, SessionService.usersMap.get(key).isConnected());
 
 				list.add(map);
 			}

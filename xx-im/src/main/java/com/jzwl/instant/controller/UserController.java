@@ -13,8 +13,10 @@ import com.google.gson.Gson;
 import com.jzwl.base.service.MongoService;
 import com.jzwl.base.service.RedisService;
 import com.jzwl.instant.pojo.FormatJsonResult;
-import com.jzwl.instant.service.impl.SendServiceImpl;
-import com.jzwl.instant.service.impl.SessionServiceImpl;
+import com.jzwl.instant.service.FileService;
+import com.jzwl.instant.service.SendService;
+import com.jzwl.instant.service.SessionService;
+import com.jzwl.instant.service.UserService;
 import com.jzwl.instant.util.JsonTool;
 
 @Controller
@@ -32,12 +34,16 @@ public class UserController {
 	private MongoService mongoService;
 
 	@Autowired
-	private SendServiceImpl sendServiceImpl;
+	private SendService sendService;
 	@Autowired
-	private SessionServiceImpl sessionServiceImpl;
+	private SessionService sessionService;
+	@Autowired
+	private FileService fileService;
+	@Autowired
+	private UserService userService;
 
 	/**
-	 * 请求添加对方为好友
+	 * 关闭连接
 	 * 
 	 * @param request
 	 * @param response
@@ -55,14 +61,14 @@ public class UserController {
 			String username = request.getParameter("username");// 发起人
 			if (null != username) {
 
-				sessionServiceImpl.disConnect(username);
+				sessionService.disConnect(username);
 
 				fjr.setFlag(1);
 				fjr.setCtrl("");
 				fjr.setMessage("连接已经断开");
 
-				sendServiceImpl.sendSystemOnlineInfoMessage(
-						sendServiceImpl.sys_off_brocast, username);
+				sendService.sendSystemOnlineInfoMessage(
+						SendService.sys_off_brocast, username);
 
 				JsonTool.printMsg(response, gson.toJson(fjr));
 
@@ -79,4 +85,60 @@ public class UserController {
 		}
 	}
 
+	/**
+	 * 上传头像
+	 * 
+	 * @param request
+	 * @param response
+	 */
+	@RequestMapping(value = "/uploadAvatar")
+	public void uploadAvatar(HttpServletRequest request,
+			HttpServletResponse response) {
+		FormatJsonResult fjr = null;
+
+		try {
+
+			String username = request.getParameter("username");// 发起人
+
+			String fileName = request.getParameter("fileName");
+
+			if (null != username && null != fileName) {
+
+				String accessUrl = fileService.uploadUserAvatar(mongoService,
+						request, username, fileName);
+
+				if (null != accessUrl) {
+
+					// 更新用户头像
+
+					boolean flag = userService.updateUserAvatar(username,
+							accessUrl);
+
+					if (flag) {
+
+						fjr = new FormatJsonResult(1, accessUrl, "t", null,
+								null);
+					} else {
+						fjr = new FormatJsonResult(0, "更新头像失败", "t", null, null);
+					}
+
+				} else {
+					fjr = new FormatJsonResult(0, "上传失败", "t", null, null);
+				}
+
+			} else {
+
+				fjr = new FormatJsonResult(0, "参数错误", "t", null, null);
+
+			}
+
+			JsonTool.printMsg(response, gson.toJson(fjr));
+
+		} catch (Exception e) {
+			fjr.setMessage(e.getMessage());
+
+			JsonTool.printMsg(response, gson.toJson(fjr));
+			e.printStackTrace();
+		}
+	}
 }

@@ -3,7 +3,6 @@ package com.jzwl.instant.service;
 import java.util.List;
 import java.util.Set;
 
-import com.jzwl.base.service.MongoService;
 import com.jzwl.instant.pojo.GroupInfo;
 
 /**
@@ -20,7 +19,7 @@ public interface GroupService {
 	 * @param username
 	 * @param mongoService
 	 */
-	public String createGroup(String username);
+	public String createGroup(String username, String groupDesc);
 
 	/**
 	 * 加入群
@@ -77,5 +76,5 @@ public interface GroupService {
 	 * @param mongoService
 	 * @return
 	 */
-	public List<GroupInfo> getAllGroups(MongoService mongoService);
+	public List<GroupInfo> getAllGroups();
 }

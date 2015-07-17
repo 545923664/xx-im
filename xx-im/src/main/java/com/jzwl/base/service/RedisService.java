@@ -75,7 +75,7 @@ public interface RedisService {
 	 * @return
 	 * @return
 	 */
-	public abstract Set Setkeys(String pattern);
+	public abstract Set<String> Setkeys(String pattern);
 
 	/**
 	 * 检查key是否已经存在

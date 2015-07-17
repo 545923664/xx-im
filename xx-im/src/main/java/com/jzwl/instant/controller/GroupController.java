@@ -22,12 +22,12 @@ import com.jzwl.instant.pojo.FormatJsonResult;
 import com.jzwl.instant.pojo.GroupInfo;
 import com.jzwl.instant.pojo.MyMessage;
 import com.jzwl.instant.pojo.UserInfo;
-import com.jzwl.instant.service.impl.FriendServiceImpl;
-import com.jzwl.instant.service.impl.GroupServiceImpl;
-import com.jzwl.instant.service.impl.MessageServiceImpl;
-import com.jzwl.instant.service.impl.SendServiceImpl;
-import com.jzwl.instant.service.impl.SessionServiceImpl;
-import com.jzwl.instant.service.impl.UserServiceImpl;
+import com.jzwl.instant.service.FriendService;
+import com.jzwl.instant.service.GroupService;
+import com.jzwl.instant.service.MessageService;
+import com.jzwl.instant.service.SendService;
+import com.jzwl.instant.service.SessionService;
+import com.jzwl.instant.service.UserService;
 import com.jzwl.instant.util.IC;
 import com.jzwl.instant.util.JsonTool;
 
@@ -46,17 +46,17 @@ public class GroupController {
 	private MongoService mongoService;
 
 	@Autowired
-	private GroupServiceImpl groupServiceImpl;
+	private GroupService groupService;
 	@Autowired
-	private UserServiceImpl userServiceImpl;
+	private UserService userService;
 	@Autowired
-	private SessionServiceImpl sessionServiceImpl;
+	private SessionService sessionService;
 	@Autowired
-	private FriendServiceImpl friendServiceImpl;
+	private FriendService friendService;
 	@Autowired
-	private MessageServiceImpl messageServiceImpl;
+	private MessageService messageService;
 	@Autowired
-	private SendServiceImpl sendServiceImpl;
+	private SendService sendService;
 
 	/**
 	 * 创建群
@@ -74,10 +74,11 @@ public class GroupController {
 
 			String username = request.getParameter("username");// 发起人
 			String groupCode = request.getParameter("groupcode");// 五位数密码
+			String groupDesc = request.getParameter("groupDesc");// 群描述
 
 			if (null != username && null != groupCode) {
 
-				String gid = groupServiceImpl.createGroup(username);
+				String gid = groupService.createGroup(username, groupDesc);
 
 				if (null != gid) {
 					// 三分钟有效
@@ -142,7 +143,7 @@ public class GroupController {
 
 				if (null != gid) {
 
-					boolean flag = groupServiceImpl.JoinGroup(username, gid);
+					boolean flag = groupService.JoinGroup(username, gid);
 
 					if (flag) {
 						fjr.setFlag(1);
@@ -150,7 +151,7 @@ public class GroupController {
 						fjr.setMessage("你已经加入群【" + gid + "】，可以聊天了");
 
 						// 通知其他群成员
-						sendServiceImpl.sendGroupNotifiMessage(username, gid);
+						sendService.sendGroupNotifiMessage(username, gid);
 
 					} else {
 						fjr.setFlag(0);
@@ -206,12 +207,12 @@ public class GroupController {
 
 			if (null != username && null != gid) {
 
-				GroupInfo group = groupServiceImpl.getGroupInfo(gid);
+				GroupInfo group = groupService.getGroupInfo(gid);
 
 				if (null != group) {
 					Set<String> member = group.getMember();
 
-					boolean isMember = groupServiceImpl.checkIsGroupMember(
+					boolean isMember = groupService.checkIsGroupMember(
 							username, member);
 
 					if (isMember) {
@@ -231,15 +232,15 @@ public class GroupController {
 						message.setTousername(mid);
 
 						message.setMessage("逗比"
-								+ userServiceImpl.getUserNickName(mid) + "你好["
-								+ userServiceImpl.getUserNickName(username)
+								+ userService.getUserNickName(mid) + "你好["
+								+ userService.getUserNickName(username)
 								+ "]要加您的群" + group.getDesc() + "是否同意");
 
 						message.putExtKey("action", IC.ACTION_APPLY_GROUP);
 
 						message.putExtKey("gid", gid);
 
-						messageServiceImpl.joinSendQueue(gson.toJson(message));
+						messageService.joinSendQueue(gson.toJson(message));
 
 						fjr.setFlag(1);
 						fjr.setCtrl("t");
@@ -295,7 +296,7 @@ public class GroupController {
 
 			if (null != applyUsername && null != gid && null != isAgreen) {
 
-				GroupInfo group = groupServiceImpl.getGroupInfo(gid);
+				GroupInfo group = groupService.getGroupInfo(gid);
 
 				if (null != group) {
 
@@ -303,7 +304,7 @@ public class GroupController {
 
 						Set<String> member = group.getMember();
 
-						boolean isMember = groupServiceImpl.checkIsGroupMember(
+						boolean isMember = groupService.checkIsGroupMember(
 								applyUsername, member);
 
 						if (isMember) {
@@ -311,7 +312,7 @@ public class GroupController {
 									"t", null, null);
 						} else {
 
-							boolean flag = groupServiceImpl.JoinGroup(
+							boolean flag = groupService.JoinGroup(
 									applyUsername, gid);
 
 							if (flag) {
@@ -327,14 +328,17 @@ public class GroupController {
 								message.setUsername(mid);
 								message.setTousername(applyUsername);
 
-								message.setMessage("逗比" + applyUsername + "你好["
-										+ mid + "]同意你加入群" + group.getDesc());
+								message.setMessage("逗比"
+										+ userService
+												.getUserNickName(applyUsername)
+										+ "你好[" + mid + "]同意你加入群"
+										+ group.getDesc());
 
-								messageServiceImpl.joinSendQueue(gson
+								messageService.joinSendQueue(gson
 										.toJson(message));
 
 								// 通知其他群成员
-								sendServiceImpl.sendGroupNotifiMessage(
+								sendService.sendGroupNotifiMessage(
 										applyUsername, gid);
 
 								fjr = new FormatJsonResult(1, "已同意", "t", null,
@@ -359,10 +363,12 @@ public class GroupController {
 						message.setUsername(group.getMid());
 						message.setTousername(applyUsername);
 
-						message.setMessage("屌丝" + applyUsername + "你好["
-								+ group.getMid() + "]拒绝你加入群" + group.getDesc());
+						message.setMessage("屌丝"
+								+ userService.getUserNickName(applyUsername)
+								+ "你好[" + group.getMid() + "]拒绝你加入群"
+								+ group.getDesc());
 
-						messageServiceImpl.joinSendQueue(gson.toJson(message));
+						messageService.joinSendQueue(gson.toJson(message));
 
 						fjr = new FormatJsonResult(1, "已拒绝", "t", null, null);
 					}
@@ -412,13 +418,12 @@ public class GroupController {
 
 				if ("all".equals(gid)) {
 
-					List<GroupInfo> tempList = groupServiceImpl
-							.getAllGroups(mongoService);
+					List<GroupInfo> tempList = groupService.getAllGroups();
 
 					list.addAll(tempList);
 
 				} else {
-					GroupInfo group = groupServiceImpl.getGroupInfo(gid);
+					GroupInfo group = groupService.getGroupInfo(gid);
 
 					if (null != group) {
 						list.add(group);
@@ -471,7 +476,7 @@ public class GroupController {
 
 				Map<String, Object> groupInfo = new HashMap<String, Object>();
 
-				GroupInfo group = groupServiceImpl.getGroupInfo(gid);
+				GroupInfo group = groupService.getGroupInfo(gid);
 
 				if (null != group) {
 
@@ -481,7 +486,7 @@ public class GroupController {
 
 					for (String uid : member) {
 
-						UserInfo user = userServiceImpl.getUserInfoFromDB(uid);
+						UserInfo user = userService.getUserInfoFromDB(uid);
 
 						if (null != user) {
 							list.add(user);
@@ -535,12 +540,13 @@ public class GroupController {
 
 			if (null != gid && null != username) {
 
-				boolean flag = groupServiceImpl.quiteGroup(username, gid);
+				boolean flag = groupService.quiteGroup(username, gid);
 
 				if (flag) {
 					// 发送群通知
-					sendServiceImpl.sendGroupNotifiMessage(username, gid, username
-							+ "退出此群", mongoService, redisService);
+					sendService.sendGroupNotifiMessage(username, gid,
+							userService.getUserNickName(username) + "退出此群",
+							mongoService, redisService);
 
 					fjr = new FormatJsonResult(1, "退出成功", "t", null, null);
 				} else {
@@ -579,11 +585,11 @@ public class GroupController {
 
 			if (null != gid && null != username) {
 
-				GroupInfo group = groupServiceImpl.getGroupInfo(gid);
+				GroupInfo group = groupService.getGroupInfo(gid);
 
 				if (null != group) {
 
-					boolean flag = groupServiceImpl.disbandGroup(username, gid,
+					boolean flag = groupService.disbandGroup(username, gid,
 							group);
 
 					if (flag) {
@@ -591,7 +597,7 @@ public class GroupController {
 
 						// 发送个人系统通知
 						for (String uid : member) {
-							sendServiceImpl.sendGroupMemberNotifiMessage(uid, gid,
+							sendService.sendGroupMemberNotifiMessage(uid, gid,
 									"群" + group.getDesc() + "已经解散成功",
 									mongoService, redisService);
 						}

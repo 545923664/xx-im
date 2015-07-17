@@ -308,5 +308,7 @@ public class RedisServiceImpl implements RedisService {
 	public void trim(String key, long start, int end) {
 		redisTemplate.opsForList().trim(key, start, end);
 	}
+	
+	
 
 }

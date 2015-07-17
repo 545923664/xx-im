@@ -2,13 +2,15 @@ package com.jzwl.instant.util;
 
 /**
  * InstantConstant
+ * 
  * @author xx
- *
+ * 
  */
 public class IC {
 
 	public static final String redis_root = "im.dev.";
 	public static String server_connect_address = "192.168.1.200:12356";
+	public static String pic_prefix = "";
 
 	// public static final String redis_root = "im.";
 	// public static String server_connect_address = "192.168.1.12:12356";//
@@ -28,12 +30,13 @@ public class IC {
 	// redis 用户信息key
 	public static final String user_simple_info_key = redis_root + "user.info";
 
-	//redis 创建群key
-	public static final String user_create_group_key = redis_root + "create.group";
+	// redis 摇一摇key
+	public static final String user_rocking_key = redis_root + "user.rocking";
 
-		
-	
-	
+	// redis 创建群key
+	public static final String user_create_group_key = redis_root
+			+ "create.group";
+
 	// mongo传输的消息
 	public static final String mongodb_message = "message";
 
@@ -43,14 +46,12 @@ public class IC {
 	// mongo传输的文件
 	public static final String mongodb_fileinfo = "message_fileinfo";
 
-	
-	//mongo用户信息
+	// mongo用户信息
 	public static final String mongodb_userinfo = "user_info";
 
-	//mongo群信息
+	// mongo群信息
 	public static final String mongodb_groupinfo = "group_info";
 
-	
 	/**
 	 * 上下线通知
 	 */
@@ -66,13 +67,11 @@ public class IC {
 	 */
 	public static final String CHAT = "chat";
 
-	
 	/**
 	 * 群聊
 	 */
 	public static final String GROUP_CHAT = "groupchat";
 
-	
 	/**
 	 * ping pong
 	 */
@@ -87,8 +86,7 @@ public class IC {
 	 * 添加好友
 	 */
 	public static final String ACTION_ADD_FRIEND = "addfriend";
-	
-	
+
 	/**
 	 * 删除好友
 	 */
@@ -98,31 +96,26 @@ public class IC {
 	 * 同意好友申请
 	 */
 	public static final String ACTION_AGREE_FRIEND = "agreefriend";
-	
+
 	/**
 	 * 不同意好友申请
 	 */
 	public static final String ACTION_NOT_AGREE_FRIEND = "notagreefriend";
-	
+
 	/**
 	 * 申请入群
 	 */
-	public static final String ACTION_APPLY_GROUP= "applygroup";
-	
+	public static final String ACTION_APPLY_GROUP = "applygroup";
+
 	/**
 	 * 同意入群
 	 */
-	public static final String ACTION_AGREE_GROUP= "agreegroup";
-	
-	
+	public static final String ACTION_AGREE_GROUP = "agreegroup";
+
 	/**
 	 * 不同意入群
 	 */
-	public static final String ACTION_NOT_AGREE_GROUP= "notagreegroup";
-	
-	
-	
-
+	public static final String ACTION_NOT_AGREE_GROUP = "notagreegroup";
 
 	/**
 	 * 系统消息

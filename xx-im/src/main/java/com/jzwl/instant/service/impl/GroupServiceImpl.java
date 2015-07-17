@@ -48,7 +48,7 @@ public class GroupServiceImpl implements GroupService {
 	 * @param username
 	 * @param mongoService
 	 */
-	public String createGroup(String username) {
+	public String createGroup(String username, String groupDesc) {
 		try {
 
 			String gid = System.currentTimeMillis() + "";
@@ -57,7 +57,13 @@ public class GroupServiceImpl implements GroupService {
 			group.setGid(gid);
 			group.setMid(username);// 群主
 			group.setMaxCount(20);
-			group.setDesc("[" + username + "]的群");
+
+			if (null != groupDesc && groupDesc.length() > 0) {
+				group.setDesc(groupDesc);
+			} else {
+				group.setDesc("[" + username + "]的群");
+			}
+
 			group.setCreateDate(Util.DateFormat(new Date()));
 
 			Set<String> member = new HashSet<String>();
@@ -288,7 +294,7 @@ public class GroupServiceImpl implements GroupService {
 	 * @param mongoService
 	 * @return
 	 */
-	public List<GroupInfo> getAllGroups(MongoService mongoService) {
+	public List<GroupInfo> getAllGroups() {
 		try {
 
 			List<GroupInfo> groupList = new ArrayList<GroupInfo>();

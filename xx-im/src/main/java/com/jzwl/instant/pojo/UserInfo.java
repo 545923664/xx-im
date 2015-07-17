@@ -1,6 +1,8 @@
 package com.jzwl.instant.pojo;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class UserInfo {
@@ -34,14 +36,9 @@ public class UserInfo {
 	private String isFriend = "0";
 
 	/**
-	 * 经度
+	 * 坐标
 	 */
-	private double lng;
-
-	/**
-	 * 维度
-	 */
-	private double lat;
+	private Map<String, Double> loc = new HashMap<String, Double>();
 
 	/**
 	 * 好友列表
@@ -52,6 +49,27 @@ public class UserInfo {
 	 * 拥有的群（创建|加入）
 	 */
 	private Set<String> groups = new HashSet<String>();
+
+	/**
+	 * 和目标的距离
+	 */
+	private double distance;
+
+	/**
+	 * 头像
+	 */
+	private String avatar;
+
+	/**
+	 * 设置经纬度
+	 * 
+	 * @param lng
+	 * @param lat
+	 */
+	public void setLoction(double lng, double lat) {
+		this.loc.put("lng", lng);
+		this.loc.put("lat", lat);
+	}
 
 	public String getIsOnline() {
 		return isOnline;
@@ -117,22 +135,33 @@ public class UserInfo {
 		this.friends = friends;
 	}
 
-	public double getLng() {
-		return lng;
+	public Map<String, Double> getLoc() {
+
+		if (null != this.loc) {
+			return loc;
+		} else {
+			return new HashMap<String, Double>();
+		}
 	}
 
-	public void setLng(double lng) {
-		this.lng = lng;
+	public void setLoc(Map<String, Double> loc) {
+		this.loc = loc;
 	}
 
-	public double getLat() {
-		return lat;
+	public double getDistance() {
+		return distance;
 	}
 
-	public void setLat(double lat) {
-		this.lat = lat;
+	public void setDistance(double distance) {
+		this.distance = distance;
 	}
-	
-	
+
+	public String getAvatar() {
+		return avatar;
+	}
+
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
+	}
 
 }

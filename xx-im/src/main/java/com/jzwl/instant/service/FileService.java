@@ -9,4 +9,7 @@ public interface FileService {
 	public String upload(MongoService mongoService, HttpServletRequest request,
 			String username, String fileName);
 
+	public String uploadUserAvatar(MongoService mongoService,
+			HttpServletRequest request, String username, String fileName);
+
 }

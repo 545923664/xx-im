@@ -29,6 +29,7 @@ public class FileServiceImpl implements FileService {
 
 	@Autowired
 	private MongoService mongoService;
+	
 
 	public String upload(MongoService mongoService, HttpServletRequest request,
 			String username, String fileName) {
@@ -91,6 +92,66 @@ public class FileServiceImpl implements FileService {
 				mongoService.save(IC.mongodb_fileinfo, fileBean);
 
 				return fileBean.getAccessUrl();
+
+			}
+
+			return null;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			L.out("request stream is not find file field");
+			return null;
+		}
+
+	}
+
+	public String uploadUserAvatar(MongoService mongoService,
+			HttpServletRequest request, String username, String fileName) {
+
+		try {
+			MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+
+			// 获得文件：
+			MultipartFile file = multipartRequest.getFile("file");
+
+			if (null != file) {
+				// 获得输入流：
+				InputStream input = file.getInputStream();
+
+				BufferedInputStream in = new BufferedInputStream(input);
+
+				String AppPath = getAppPath(request);
+
+				File serverFileDir = new File(AppPath);
+
+				if (!serverFileDir.exists()) {
+					serverFileDir.mkdir();
+				}
+
+				String uuid = Util.getUUID();
+
+				String saveFileName = uuid + "_" + fileName;
+
+				FileOutputStream fo = new FileOutputStream(AppPath
+						+ saveFileName);
+
+				BufferedOutputStream out = new BufferedOutputStream(fo);
+
+				byte[] buf = new byte[4 * 1024];
+				int len = in.read(buf);// 读文件，将读到的内容放入到buf数组中，返回的是读到的长度
+				while (len != -1) {
+					out.write(buf, 0, len);
+					len = in.read(buf);
+				}
+				out.close();
+				fo.close();
+				in.close();
+				input.close();
+
+				//
+				String accessUrl = getSaveDir() + saveFileName;
+
+				return accessUrl;
 
 			}
 

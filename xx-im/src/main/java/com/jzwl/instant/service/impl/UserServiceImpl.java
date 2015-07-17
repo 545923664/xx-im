@@ -68,8 +68,7 @@ public class UserServiceImpl implements UserService {
 				updateValue.put("connectAddress", user.getConnectAddress());
 				updateValue.put("sessionID", user.getSessionID());
 				updateValue.put("userNickName", user.getUserNickName());
-				updateValue.put("lng", user.getLng());
-				updateValue.put("lat", user.getLat());
+				updateValue.put("loc", user.getLoc());
 
 				mongoService.update(IC.mongodb_userinfo, cond, updateValue);
 			} else {// 增加
@@ -110,6 +109,8 @@ public class UserServiceImpl implements UserService {
 					UserInfo user = gson.fromJson(json, UserInfo.class);
 
 					if (null != user) {
+
+						setUserInfo(username, user);
 
 						return user;
 					}
@@ -192,12 +193,12 @@ public class UserServiceImpl implements UserService {
 
 			if (null != str_lng && str_lng.length() > 1) {
 				double lng = Double.parseDouble(str_lng);
-				user.setLng(lng);
+				user.getLoc().put("lng", lng);
 			}
 
 			if (null != str_lat && str_lat.length() > 1) {
 				double lat = Double.parseDouble(str_lat);
-				user.setLat(lat);
+				user.getLoc().put("lat", lat);
 			}
 
 			// 持久化写入用户信息
@@ -393,6 +394,37 @@ public class UserServiceImpl implements UserService {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "游客";
+		}
+
+	}
+
+	@Override
+	public boolean updateUserAvatar(String username, String avatar) {
+
+		try {
+
+			Map<String, Object> cond = new HashMap<String, Object>();
+			cond.put("username", username);
+
+			List<DBObject> list = mongoService.findList(IC.mongodb_userinfo,
+					cond);
+
+			if (null != list && list.size() > 0) {// 是否存在该用户
+
+				Map<String, Object> updateValue = new HashMap<String, Object>();
+				updateValue.put("avatar", avatar);
+
+				mongoService.update(IC.mongodb_userinfo, cond, updateValue);
+
+				return true;
+				
+			} else {
+				return false;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
 		}
 
 	}

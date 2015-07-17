@@ -1,9 +1,5 @@
 package com.jzwl.instant.service.impl;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.session.IoSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +35,6 @@ public class SessionServiceImpl implements SessionService {
 	@Autowired
 	private SendService sendService;
 
-	public final Map<String, IoSession> usersMap = Collections
-			.synchronizedMap(new HashMap<String, IoSession>());
 
 	// 检查session是否可用
 	public boolean isAvaible(IoSession session) {

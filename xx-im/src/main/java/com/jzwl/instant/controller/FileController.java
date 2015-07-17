@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.google.gson.Gson;
 import com.jzwl.base.service.MongoService;
 import com.jzwl.instant.pojo.FormatJsonResult;
-import com.jzwl.instant.service.impl.FileServiceImpl;
+import com.jzwl.instant.service.FileService;
 import com.jzwl.instant.util.JsonTool;
 
 @Controller
@@ -24,7 +24,7 @@ public class FileController {
 	@Autowired
 	private MongoService mongoService;
 	@Autowired
-	private FileServiceImpl fileServiceImpl;
+	private FileService fileService;
 	
 	private Gson gson = new Gson();
 
@@ -41,7 +41,7 @@ public class FileController {
 			String fileName = request.getParameter("fileName");
 
 			if (null != username && null != fileName) {
-				String accessUrl = fileServiceImpl.upload(mongoService, request,
+				String accessUrl = fileService.upload(mongoService, request,
 						username, fileName);
 
 				if (null != accessUrl) {

@@ -93,8 +93,17 @@ public interface UserService {
 
 	/**
 	 * 获取昵称
+	 * 
 	 * @param username
 	 * @return
 	 */
 	public String getUserNickName(String username);
+
+	/**
+	 * 更新用户头像
+	 * 
+	 * @param username
+	 * @return
+	 */
+	public boolean updateUserAvatar(String username, String avatar);
 }

@@ -14,12 +14,12 @@ import com.jzwl.base.service.MongoService;
 import com.jzwl.base.service.RedisService;
 import com.jzwl.instant.pojo.FormatJsonResult;
 import com.jzwl.instant.pojo.MyMessage;
-import com.jzwl.instant.service.impl.FriendServiceImpl;
-import com.jzwl.instant.service.impl.GroupServiceImpl;
-import com.jzwl.instant.service.impl.MessageServiceImpl;
-import com.jzwl.instant.service.impl.SendServiceImpl;
-import com.jzwl.instant.service.impl.SessionServiceImpl;
-import com.jzwl.instant.service.impl.UserServiceImpl;
+import com.jzwl.instant.service.FriendService;
+import com.jzwl.instant.service.GroupService;
+import com.jzwl.instant.service.MessageService;
+import com.jzwl.instant.service.SendService;
+import com.jzwl.instant.service.SessionService;
+import com.jzwl.instant.service.UserService;
 import com.jzwl.instant.util.IC;
 import com.jzwl.instant.util.JsonTool;
 
@@ -38,17 +38,17 @@ public class FriendController {
 	private MongoService mongoService;
 
 	@Autowired
-	private GroupServiceImpl groupServiceImpl;
+	private GroupService groupService;
 	@Autowired
-	private UserServiceImpl userServiceImpl;
+	private UserService userService;
 	@Autowired
-	private SessionServiceImpl sessionServiceImpl;
+	private SessionService sessionService;
 	@Autowired
-	private FriendServiceImpl friendServiceImpl;
+	private FriendService friendService;
 	@Autowired
-	private MessageServiceImpl messageServiceImpl;
+	private MessageService messageService;
 	@Autowired
-	private SendServiceImpl sendServiceImpl;
+	private SendService sendService;
 
 	/**
 	 * 请求添加对方为好友
@@ -82,7 +82,7 @@ public class FriendController {
 
 				message.putExtKey("action", IC.ACTION_ADD_FRIEND);
 
-				messageServiceImpl.joinSendQueue(gson.toJson(message));
+				messageService.joinSendQueue(gson.toJson(message));
 
 				fjr.setFlag(1);
 				fjr.setCtrl("t");
@@ -124,10 +124,10 @@ public class FriendController {
 		try {
 
 			String username = request.getParameter("username");// 发起人
-			String userNickName = request.getParameter("user_nickname");
+			String userNickName = userService.getUserNickName(username);
 
 			String destUsername = request.getParameter("dest_username");// 目标
-			String destNickName = request.getParameter("dest_nickname");
+			String destNickName = userService.getUserNickName(destUsername);
 
 			if (null != username && null != destUsername) {
 
@@ -144,12 +144,12 @@ public class FriendController {
 
 				message.putExtKey("action", IC.ACTION_DEL_FRIEND);
 
-				messageServiceImpl.joinSendQueue(gson.toJson(message));
+				messageService.joinSendQueue(gson.toJson(message));
 
 				// 删除好友关系
-				friendServiceImpl.delFriend(username, destUsername);
+				friendService.delFriend(username, destUsername);
 				// 双向
-				friendServiceImpl.delFriend(destUsername, username);
+				friendService.delFriend(destUsername, username);
 
 				fjr = new FormatJsonResult(1, "目标已删除", "t", null, null);
 
@@ -182,9 +182,9 @@ public class FriendController {
 		try {
 
 			String username = request.getParameter("username");// 接收人
-			String userNickName = request.getParameter("user_nickname");
+			String userNickName = userService.getUserNickName(username);
 			String destUsername = request.getParameter("dest_username");// 发起人
-			String destNickName = request.getParameter("dest_nickname");
+			String destNickName = userService.getUserNickName(destUsername);
 
 			String isAgreen = request.getParameter("is_agree");
 
@@ -210,9 +210,9 @@ public class FriendController {
 					fjr.setMessage("您已经同意了" + destNickName + "的申请");
 
 					// 建立好友关系
-					friendServiceImpl.addFriend(username, destUsername);
+					friendService.addFriend(username, destUsername);
 					// 双向
-					friendServiceImpl.addFriend(destUsername, username);
+					friendService.addFriend(destUsername, username);
 
 				} else {// 拒绝
 
@@ -223,7 +223,7 @@ public class FriendController {
 					fjr.setMessage("您已拒绝了" + destNickName + "的申请");
 				}
 
-				messageServiceImpl.joinSendQueue(gson.toJson(message));
+				messageService.joinSendQueue(gson.toJson(message));
 
 				JsonTool.printMsg(response, gson.toJson(fjr));
 

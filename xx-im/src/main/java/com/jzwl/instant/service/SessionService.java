@@ -1,5 +1,9 @@
 package com.jzwl.instant.service;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.mina.core.session.IoSession;
 
 import com.jzwl.instant.pojo.MyMessage;
@@ -13,6 +17,9 @@ import com.jzwl.instant.pojo.MyMessage;
 public interface SessionService {
 
 	// 检查session是否可用
+	public final Map<String, IoSession> usersMap = Collections
+			.synchronizedMap(new HashMap<String, IoSession>());
+
 	public boolean isAvaible(IoSession session);
 
 	// 加入状态
