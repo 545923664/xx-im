@@ -9,6 +9,7 @@ import com.jzwl.instant.service.BootstarpService;
 import com.jzwl.instant.service.MessageService;
 import com.jzwl.instant.service.RecieveService;
 import com.jzwl.instant.service.SendService;
+import com.jzwl.instant.util.IC;
 import com.jzwl.instant.util.L;
 
 @Component
@@ -85,8 +86,8 @@ public class BootstarpServiceImpl implements BootstarpService {
 
 	public void idle() {
 
-		if (wait_sec >= 5000) {
-			wait_sec = 5000;
+		if (wait_sec >= IC.maxidle) {
+			wait_sec = IC.maxidle;
 		} else {
 			wait_sec = wait_sec + wait_sec + 10;
 		}

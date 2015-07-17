@@ -10,7 +10,8 @@ public class IC {
 
 	public static final String redis_root = "im.dev.";
 	public static String server_connect_address = "192.168.1.200:12356";
-	public static String pic_prefix = "";
+
+	public static final int maxidle = 30000;//最大空闲30s
 
 	// public static final String redis_root = "im.";
 	// public static String server_connect_address = "192.168.1.12:12356";//
