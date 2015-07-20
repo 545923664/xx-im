@@ -1,5 +1,8 @@
 package com.jzwl.instant.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -13,6 +16,7 @@ import com.google.gson.Gson;
 import com.jzwl.base.service.MongoService;
 import com.jzwl.base.service.RedisService;
 import com.jzwl.instant.pojo.FormatJsonResult;
+import com.jzwl.instant.pojo.UserInfo;
 import com.jzwl.instant.service.FileService;
 import com.jzwl.instant.service.SendService;
 import com.jzwl.instant.service.SessionService;
@@ -41,6 +45,133 @@ public class UserController {
 	private FileService fileService;
 	@Autowired
 	private UserService userService;
+
+	/**
+	 * 注册
+	 * 
+	 * @param request
+	 * @param response
+	 */
+	@RequestMapping(value = "/register")
+	public void register(HttpServletRequest request,
+			HttpServletResponse response) {
+
+		FormatJsonResult fjr = null;
+
+		try {
+
+			String account = request.getParameter("account");// 账号
+			String nickname = request.getParameter("nickname");// 昵称
+			String password = request.getParameter("password");
+			String password2 = request.getParameter("password2");
+
+			if (null != account && null != password) {
+
+				// 检查账号是否合法
+				if (account.length() < 5) {
+
+					fjr = new FormatJsonResult(0, "逗比，长度太短", "t", null, null);
+					JsonTool.printMsg(response, gson.toJson(fjr));
+					return;
+
+				}
+
+				if (!password.equals(password2)) {
+					fjr = new FormatJsonResult(0, "逗比，两次密码不一致", "t", null, null);
+					JsonTool.printMsg(response, gson.toJson(fjr));
+					return;
+
+				}
+
+				// 检查是否存在
+				boolean isExist = userService.accountIsExist(account);
+
+				if (isExist) {
+					fjr = new FormatJsonResult(0, "账号已经存在", "t", null, null);
+					JsonTool.printMsg(response, gson.toJson(fjr));
+					return;
+				}
+
+				// 创建账号
+				String username = userService.createAccount(account, password,
+						nickname);
+
+				if (null != username) {
+
+					fjr = new FormatJsonResult(1, username, "t", null, null);
+				} else {
+
+					fjr = new FormatJsonResult(0, "创建失败", "t", null, null);
+				}
+
+			} else {
+
+				fjr = new FormatJsonResult(0, "参数错误", "t", null, null);
+
+			}
+
+			JsonTool.printMsg(response, gson.toJson(fjr));
+
+		} catch (Exception e) {
+
+			fjr = new FormatJsonResult(0, e.getMessage(), "t", null, null);
+
+			JsonTool.printMsg(response, gson.toJson(fjr));
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 登陆
+	 * 
+	 * @param request
+	 * @param response
+	 */
+	@RequestMapping(value = "/login")
+	public void login(HttpServletRequest request, HttpServletResponse response) {
+
+		FormatJsonResult fjr = null;
+
+		try {
+
+			String account = request.getParameter("account");// 账号
+			String password = request.getParameter("password");
+
+			if (null != account && null != password) {
+
+				UserInfo user = userService
+						.findUserByAccount(account, password);
+
+				if (null != user) {
+					
+					Map<String, Object> map=new HashMap<String, Object>();
+					
+					map.put("userinfo", user);
+					
+					fjr = new FormatJsonResult(1, user.getUsername(), "", null, map);
+				
+				}else{
+					
+					fjr = new FormatJsonResult(0, "逗x账号或密码错误", "t", null, null);
+				}
+				
+
+			} else {
+
+				fjr = new FormatJsonResult(0, "参数错误", "t", null, null);
+
+			}
+
+			JsonTool.printMsg(response, gson.toJson(fjr));
+
+		} catch (Exception e) {
+
+			fjr = new FormatJsonResult(0, e.getMessage(), "t", null, null);
+
+			JsonTool.printMsg(response, gson.toJson(fjr));
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * 关闭连接

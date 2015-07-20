@@ -17,6 +17,33 @@ import com.jzwl.instant.pojo.UserInfo;
 public interface UserService {
 
 	/**
+	 * 判断账号是否存在
+	 * 
+	 * @param account
+	 * @return
+	 */
+	public boolean accountIsExist(String account);
+
+	/**
+	 * 创建账号
+	 * 
+	 * @param account
+	 * @param password
+	 * @param nickname
+	 * @return
+	 */
+	public String createAccount(String account, String password, String nickname);
+
+	/**
+	 * 通过账号获取用户信息
+	 * 
+	 * @param account
+	 * @param password
+	 * @return
+	 */
+	public UserInfo findUserByAccount(String account, String password);
+
+	/**
 	 * 登录时保存用户信息到数据库
 	 * 
 	 * @param mongoService

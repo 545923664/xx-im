@@ -11,7 +11,7 @@ public class IC {
 	public static final String redis_root = "im.dev.";
 	public static String server_connect_address = "192.168.1.200:12356";
 
-	public static final int maxidle = 30000;//最大空闲30s
+	public static final int maxidle = 30000;// 最大空闲30s
 
 	// public static final String redis_root = "im.";
 	// public static String server_connect_address = "192.168.1.12:12356";//
@@ -52,6 +52,9 @@ public class IC {
 
 	// mongo群信息
 	public static final String mongodb_groupinfo = "group_info";
+
+	// mongo动态
+	public static final String mongodb_dynamic = "dynamic";
 
 	/**
 	 * 上下线通知

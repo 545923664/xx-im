@@ -13,6 +13,17 @@ public class UserInfo {
 	private String username;
 
 	/**
+	 * 登陆账号
+	 */
+	private String account;
+
+	
+	/**
+	 * 密码
+	 */
+	private String password;
+
+	/**
 	 * 用户昵称
 	 */
 	private String userNickName;
@@ -163,5 +174,23 @@ public class UserInfo {
 	public void setAvatar(String avatar) {
 		this.avatar = avatar;
 	}
+
+	public String getAccount() {
+		return account;
+	}
+
+	public void setAccount(String account) {
+		this.account = account;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	
+	
 
 }

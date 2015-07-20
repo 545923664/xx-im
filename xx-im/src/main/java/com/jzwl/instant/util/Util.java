@@ -26,7 +26,7 @@ public class Util {
 		return UUID.randomUUID().toString();
 	}
 
-	public static void main(String[] args) {
+	public static void main2(String[] args) {
 		// System.out.println(getUUID());
 		// System.out.println(System.currentTimeMillis());
 		// System.out.println((Math.random()*1000+"").split("\\.")[0]);
@@ -48,6 +48,11 @@ public class Util {
 			}
 		}
 	}
+	
+	public static void main(String[] args) {
+		System.out.println(stringToMD5("112233"));
+
+	}
 
 	/**
 	 * 生成24位UUID
@@ -63,6 +68,17 @@ public class Util {
 		}
 		Long uuid = new Long(formatter.format(currentTime) + count);
 		return uuid.toString();
+	}
+
+	public static synchronized long getLongUUID() {
+		count++;
+		Date currentTime = new Date();
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmssssss");
+		if (count > 9) {
+			count = 0;
+		}
+		Long uuid = new Long(formatter.format(currentTime) + count);
+		return uuid;
 	}
 
 	protected static int countOrd = 0;
@@ -226,7 +242,6 @@ public class Util {
 				"yyyy-MM-dd HH:mm:ss");
 		return dateFormat.format(date);
 	}
-
 
 	/**
 	 * 格式化日朄1�7

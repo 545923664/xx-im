@@ -22,6 +22,7 @@ import com.jzwl.instant.service.SessionService;
 import com.jzwl.instant.service.UserService;
 import com.jzwl.instant.util.IC;
 import com.jzwl.instant.util.L;
+import com.jzwl.instant.util.Util;
 import com.mongodb.DBObject;
 
 /**
@@ -46,6 +47,116 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private SessionService sessionService;
+
+	/**
+	 * 判断账号是否存在
+	 * 
+	 * @param account
+	 * @return
+	 */
+	public boolean accountIsExist(String account) {
+
+		try {
+
+			Map<String, Object> cond = new HashMap<String, Object>();
+			cond.put("account", account);
+
+			List<DBObject> list = mongoService.findList(IC.mongodb_userinfo,
+					cond);
+
+			if (null != list && list.size() > 0) {// 存在
+				return true;
+			} else {// 不存在
+				return false;
+			}
+
+		} catch (Exception e) {
+			return true;
+		}
+
+	}
+
+	/**
+	 * 创建账号
+	 * 
+	 * @param account
+	 * @param password
+	 * @param nickname
+	 * @return
+	 */
+	public String createAccount(String account, String password, String nickname) {
+
+		try {
+
+			boolean isExist = accountIsExist(account);
+
+			if (!isExist) {
+
+				UserInfo user = new UserInfo();
+
+				user.setAccount(account);
+				user.setPassword(Util.stringToMD5(password));
+				user.setUserNickName(nickname);
+				user.setUsername(System.currentTimeMillis() + "");
+
+				mongoService.save(IC.mongodb_userinfo, user);
+
+				return user.getUsername();
+
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		return null;
+	}
+
+	/**
+	 * 通过账号获取用户信息
+	 * @param account
+	 * @param password
+	 * @return
+	 */
+	public UserInfo findUserByAccount(String account, String password) {
+
+		try {
+
+			Map<String, Object> cond = new HashMap<String, Object>();
+			cond.put("account", account);
+			cond.put("password", Util.stringToMD5(password));
+			
+			List<DBObject> list = mongoService.findList(IC.mongodb_userinfo,
+					cond);
+
+			if (null != list && list.size() > 0) {// 存在
+				
+				DBObject obj = list.get(0);
+
+				obj.removeField("_id");
+
+				String json = gson.toJson(obj);
+
+				UserInfo user = gson.fromJson(json, UserInfo.class);
+
+				if (null != user) {
+
+					setUserInfo(user.getUsername(), user);
+
+					return user;
+				}
+			} else {// 不存在
+				return null;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		return null;
+	}
 
 	/**
 	 * 登录时保存用户信息到数据库
@@ -417,7 +528,7 @@ public class UserServiceImpl implements UserService {
 				mongoService.update(IC.mongodb_userinfo, cond, updateValue);
 
 				return true;
-				
+
 			} else {
 				return false;
 			}

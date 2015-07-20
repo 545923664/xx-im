@@ -572,8 +572,8 @@ public class GroupController {
 	 * @param request
 	 * @param response
 	 */
-	@RequestMapping(value = "/diabandGroup")
-	public void diabandGroup(HttpServletRequest request,
+	@RequestMapping(value = "/disbandGroup")
+	public void disbandGroup(HttpServletRequest request,
 			HttpServletResponse response) {
 
 		FormatJsonResult fjr = null;
