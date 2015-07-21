@@ -12,6 +12,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import com.jzwl.base.service.RedisService;
+import com.jzwl.instant.util.IC;
 
 /**
  * 封装redis 缓存服务器服务接口
@@ -23,9 +24,6 @@ import com.jzwl.base.service.RedisService;
 @Component
 public class RedisServiceImpl implements RedisService {
 
-	private static String redisCode = "utf-8";
-
-	// private static String redisCode = "gbk";
 
 	public RedisServiceImpl() {
 
@@ -128,7 +126,7 @@ public class RedisServiceImpl implements RedisService {
 				try {
 					byte[] result = connection.get(key.getBytes());
 					if (null != result) {
-						return new String(result, redisCode);
+						return new String(result, IC.redisCode);
 					} else {
 						return null;
 					}

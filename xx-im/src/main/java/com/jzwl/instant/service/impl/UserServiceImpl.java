@@ -115,6 +115,7 @@ public class UserServiceImpl implements UserService {
 
 	/**
 	 * 通过账号获取用户信息
+	 * 
 	 * @param account
 	 * @param password
 	 * @return
@@ -126,12 +127,12 @@ public class UserServiceImpl implements UserService {
 			Map<String, Object> cond = new HashMap<String, Object>();
 			cond.put("account", account);
 			cond.put("password", Util.stringToMD5(password));
-			
+
 			List<DBObject> list = mongoService.findList(IC.mongodb_userinfo,
 					cond);
 
 			if (null != list && list.size() > 0) {// 存在
-				
+
 				DBObject obj = list.get(0);
 
 				obj.removeField("_id");
@@ -347,6 +348,7 @@ public class UserServiceImpl implements UserService {
 	 * @return
 	 */
 	public UserInfo getUserInfo(String username) {
+
 		String res = redisService.get(IC.user_simple_info_key + username);
 		try {
 			if (null != username) {

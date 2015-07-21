@@ -4,11 +4,12 @@ public class N {
 
 	/**
 	 * 是否不为空
+	 * 
 	 * @param str
 	 * @return
 	 */
 	public static boolean isNotNull(String str) {
-		
+
 		if (null != str && str.length() > 0) {
 			return true;
 		}
@@ -16,4 +17,9 @@ public class N {
 		return false;
 
 	}
+
+	public static boolean isNull(String str) {
+		return !isNotNull(str);
+	}
+
 }

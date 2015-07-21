@@ -22,6 +22,7 @@ import com.jzwl.instant.service.SendService;
 import com.jzwl.instant.service.SessionService;
 import com.jzwl.instant.service.UserService;
 import com.jzwl.instant.util.JsonTool;
+import com.jzwl.instant.util.N;
 
 @Controller
 @RequestMapping("/user")
@@ -143,18 +144,18 @@ public class UserController {
 						.findUserByAccount(account, password);
 
 				if (null != user) {
-					
-					Map<String, Object> map=new HashMap<String, Object>();
-					
+
+					Map<String, Object> map = new HashMap<String, Object>();
+
 					map.put("userinfo", user);
-					
-					fjr = new FormatJsonResult(1, user.getUsername(), "", null, map);
-				
-				}else{
-					
+
+					fjr = new FormatJsonResult(1, user.getUsername(), "", null,
+							map);
+
+				} else {
+
 					fjr = new FormatJsonResult(0, "逗x账号或密码错误", "t", null, null);
 				}
-				
 
 			} else {
 
@@ -235,8 +236,8 @@ public class UserController {
 
 			if (null != username && null != fileName) {
 
-				String accessUrl = fileService.uploadUserAvatar(mongoService,
-						request, username, fileName);
+				String accessUrl = fileService.uploadPic(request, username,
+						fileName);
 
 				if (null != accessUrl) {
 
@@ -272,4 +273,62 @@ public class UserController {
 			e.printStackTrace();
 		}
 	}
+
+	/**
+	 * 查看用户个人信息
+	 * @param request
+	 * @param response
+	 */
+	@RequestMapping(value = "/getUserInfo")
+	public void getUserInfo(HttpServletRequest request,
+			HttpServletResponse response) {
+
+		FormatJsonResult fjr = null;
+
+		try {
+
+			Map<String, Object> map = new HashMap<String, Object>();
+
+			String username = request.getParameter("username");// 账号
+
+			if (N.isNotNull(username)) {
+
+				UserInfo user = userService.getUserInfo(username);
+
+				if (null != user) {
+					map.put("user", user);
+				} else {
+
+					user = userService.getUserInfoFromDB(username);
+
+					if (null != user) {
+						map.put("user", user);
+					}
+				}
+
+				if (null != user) {
+					fjr = new FormatJsonResult(1, user.getUsername(), "", null,
+							map);
+				} else {
+
+					fjr = new FormatJsonResult(0, "用户不存在", "t", null, null);
+				}
+
+			} else {
+
+				fjr = new FormatJsonResult(0, "参数错误", "t", null, null);
+
+			}
+
+			JsonTool.printMsg(response, gson.toJson(fjr));
+
+		} catch (Exception e) {
+
+			fjr = new FormatJsonResult(0, e.getMessage(), "t", null, null);
+
+			JsonTool.printMsg(response, gson.toJson(fjr));
+			e.printStackTrace();
+		}
+	}
+
 }

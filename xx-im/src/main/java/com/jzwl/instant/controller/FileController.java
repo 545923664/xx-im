@@ -25,7 +25,7 @@ public class FileController {
 	private MongoService mongoService;
 	@Autowired
 	private FileService fileService;
-	
+
 	private Gson gson = new Gson();
 
 	@RequestMapping(value = "/upload")
@@ -41,15 +41,15 @@ public class FileController {
 			String fileName = request.getParameter("fileName");
 
 			if (null != username && null != fileName) {
-				String accessUrl = fileService.upload(mongoService, request,
-						username, fileName);
+				String accessUrl = fileService.upload(request, username,
+						fileName);
 
 				if (null != accessUrl) {
 					fjr = new FormatJsonResult(1, accessUrl, "t", null, null);
 				} else {
 					fjr = new FormatJsonResult(1, "上传失败", "t", null, null);
 				}
-			}else{
+			} else {
 				fjr = new FormatJsonResult(0, "参数错误", "t", null, null);
 			}
 

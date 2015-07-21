@@ -3,6 +3,7 @@ package com.jzwl.instant.service;
 import java.util.List;
 import java.util.Set;
 
+import com.jzwl.instant.pojo.Dynamic;
 import com.mongodb.DBObject;
 
 /**
@@ -19,7 +20,7 @@ public interface DynamicService {
 	 * @param uid
 	 * @return
 	 */
-	public List<DBObject> getDynamicList(String uid);
+	public List<Dynamic> getDynamicList(String uid);
 
 	/**
 	 * 发布动态

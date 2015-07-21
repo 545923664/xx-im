@@ -1,15 +1,17 @@
 package com.jzwl.instant.service;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.Set;
 
-import com.jzwl.base.service.MongoService;
+import javax.servlet.http.HttpServletRequest;
 
 public interface FileService {
 
-	public String upload(MongoService mongoService, HttpServletRequest request,
-			String username, String fileName);
+	public String upload(HttpServletRequest request, String username,
+			String fileName);
 
-	public String uploadUserAvatar(MongoService mongoService,
-			HttpServletRequest request, String username, String fileName);
+	public String uploadPic(HttpServletRequest request, String username,
+			String fileName);
+
+	public Set<String> uploadPics(HttpServletRequest request, String username);
 
 }

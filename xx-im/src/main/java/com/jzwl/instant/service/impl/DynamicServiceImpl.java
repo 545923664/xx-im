@@ -1,5 +1,6 @@
 package com.jzwl.instant.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -47,7 +48,9 @@ public class DynamicServiceImpl implements DynamicService {
 	 * @param uid
 	 * @return
 	 */
-	public List<DBObject> getDynamicList(String uid) {
+	public List<Dynamic> getDynamicList(String uid) {
+
+		List<Dynamic> res = new ArrayList<Dynamic>();
 
 		try {
 
@@ -57,7 +60,20 @@ public class DynamicServiceImpl implements DynamicService {
 			List<DBObject> list = mongoService.findList(IC.mongodb_dynamic,
 					cond);
 
-			return list;
+			for (DBObject obj : list) {
+				obj.removeField("_id");
+
+				String json = gson.toJson(obj);
+
+				Dynamic dynamic = gson.fromJson(json, Dynamic.class);
+
+				dynamic.setComments(getCommentsByDid(dynamic.getDid()));
+
+				res.add(dynamic);
+
+			}
+
+			return res;
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -127,46 +143,26 @@ public class DynamicServiceImpl implements DynamicService {
 
 			if (null != list && list.size() > 0) {
 
-				DBObject obj = list.get(0);
+				Comment comment = new Comment();
 
-				if (null != obj) {
-					obj.removeField("_id");
-					String json = gson.toJson(obj);
+				comment.setCid(System.currentTimeMillis() + "");
+				comment.setDid(did);
 
-					Dynamic dynamic = gson.fromJson(json, Dynamic.class);
-
-					if (null == dynamic.getComments()) {
-
-						Set<Comment> comments = new HashSet<Comment>();
-
-						dynamic.setComments(comments);
-					}
-
-					Comment comment = new Comment();
-
-					comment.setCid(System.currentTimeMillis() + "");
-					comment.setDid(dynamic.getDid());
-
-					if (N.isNotNull(pid)) {
-						comment.setPid(pid);
-					} else {
-						comment.setPid("#");// 普通
-					}
-
-					comment.setFromUid(fromUid);
-					comment.setToUid(toUid);
-					comment.setMessage(message);
-					comment.setCommentDate(System.currentTimeMillis());
-
-					dynamic.getComments().add(comment);
-
-					// 更新
-					Map<String, Object> updateValue = new HashMap<String, Object>();
-					updateValue.put("comments", dynamic.getComments());
-
-					mongoService.update(IC.mongodb_dynamic, cond, updateValue);
-
+				if (N.isNotNull(pid)) {
+					comment.setPid(pid);
+				} else {
+					comment.setPid("#");// 普通
 				}
+
+				comment.setFromUid(fromUid);
+				comment.setToUid(toUid);
+				comment.setMessage(message);
+				comment.setCommentDate(System.currentTimeMillis());
+
+				mongoService.save(IC.mongodb_dynamic_comment, comment);
+
+				return true;
+
 			}
 
 			return false;
@@ -175,6 +171,43 @@ public class DynamicServiceImpl implements DynamicService {
 			e.printStackTrace();
 
 			return false;
+		}
+
+	}
+
+	/**
+	 * 获取动态对应的评论
+	 * 
+	 * @param did
+	 * @return
+	 */
+	public Set<Comment> getCommentsByDid(String did) {
+
+		Set<Comment> comments = new HashSet<Comment>();
+
+		try {
+
+			Map<String, Object> cond = new HashMap<String, Object>();
+			cond.put("did", did);
+
+			List<DBObject> list = mongoService.findList(
+					IC.mongodb_dynamic_comment, cond);
+
+			for (DBObject obj : list) {
+				obj.removeField("_id");
+
+				String json = gson.toJson(obj);
+
+				Comment comment = gson.fromJson(json, Comment.class);
+
+				comments.add(comment);
+			}
+
+			return comments;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return comments;
 		}
 
 	}

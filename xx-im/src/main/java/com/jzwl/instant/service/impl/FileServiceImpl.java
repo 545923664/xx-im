@@ -5,6 +5,9 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -29,10 +32,12 @@ public class FileServiceImpl implements FileService {
 
 	@Autowired
 	private MongoService mongoService;
-	
 
-	public String upload(MongoService mongoService, HttpServletRequest request,
-			String username, String fileName) {
+	/**
+	 * 上传聊天文件
+	 */
+	public String upload(HttpServletRequest request, String username,
+			String fileName) {
 
 		try {
 			MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
@@ -105,8 +110,11 @@ public class FileServiceImpl implements FileService {
 
 	}
 
-	public String uploadUserAvatar(MongoService mongoService,
-			HttpServletRequest request, String username, String fileName) {
+	/**
+	 * 上传图片
+	 */
+	public String uploadPic(HttpServletRequest request, String username,
+			String fileName) {
 
 		try {
 			MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
@@ -165,6 +173,77 @@ public class FileServiceImpl implements FileService {
 
 	}
 
+	/**
+	 * 上传多图片
+	 */
+	public Set<String> uploadPics(HttpServletRequest request, String username) {
+
+		Set<String> uploadUrls = new HashSet<String>();
+
+		try {
+
+			MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+
+			List<MultipartFile> fileList = multipartRequest.getFiles("file");
+
+			if (null != fileList && fileList.size() > 0) {
+
+				for (MultipartFile file : fileList) {
+
+					if (null != file) {
+						// 获得输入流：
+						InputStream input = file.getInputStream();
+
+						BufferedInputStream in = new BufferedInputStream(input);
+
+						String AppPath = getAppPath(request);
+
+						File serverFileDir = new File(AppPath);
+
+						if (!serverFileDir.exists()) {
+							serverFileDir.mkdir();
+						}
+
+						String uuid = Util.getUUID();
+
+						String saveFileName = uuid + "_"
+								+ file.getOriginalFilename();
+
+						FileOutputStream fo = new FileOutputStream(AppPath
+								+ saveFileName);
+
+						BufferedOutputStream out = new BufferedOutputStream(fo);
+
+						byte[] buf = new byte[4 * 1024];
+						int len = in.read(buf);// 读文件，将读到的内容放入到buf数组中，返回的是读到的长度
+						while (len != -1) {
+							out.write(buf, 0, len);
+							len = in.read(buf);
+						}
+						out.close();
+						fo.close();
+						in.close();
+						input.close();
+
+						//
+						String accessUrl = getSaveDir() + saveFileName;
+
+						uploadUrls.add(accessUrl);
+
+					}
+				}
+			}
+
+			return uploadUrls;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			L.out("request stream is not find file field");
+			return uploadUrls;
+		}
+
+	}
+
 	public String getSaveDir() {
 		return "/upload/";
 	}
@@ -175,4 +254,5 @@ public class FileServiceImpl implements FileService {
 				+ getSaveDir();
 		return AppPath;
 	}
+
 }
