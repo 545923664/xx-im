@@ -21,11 +21,13 @@ import com.jzwl.base.service.MongoService;
 import com.jzwl.base.service.RedisService;
 import com.jzwl.instant.pojo.FormatJsonResult;
 import com.jzwl.instant.pojo.GroupInfo;
+import com.jzwl.instant.pojo.ServiceAccount;
 import com.jzwl.instant.pojo.UserInfo;
 import com.jzwl.instant.service.FriendService;
 import com.jzwl.instant.service.GroupService;
 import com.jzwl.instant.service.LocationService;
 import com.jzwl.instant.service.SendService;
+import com.jzwl.instant.service.ServiceAccountService;
 import com.jzwl.instant.service.SessionService;
 import com.jzwl.instant.service.UserService;
 import com.jzwl.instant.util.IC;
@@ -59,6 +61,9 @@ public class ChatController {
 	private SendService sendService;
 	@Autowired
 	private LocationService locationService;
+	@Autowired
+	private ServiceAccountService serviceAccountService;
+
 
 	/**
 	 * 获取在线用户系信息
@@ -78,6 +83,9 @@ public class ChatController {
 		List<UserInfo> firendList = new ArrayList<UserInfo>();
 		// 群列表
 		List<GroupInfo> groupList = new ArrayList<GroupInfo>();
+		//服务号
+		List<ServiceAccount> accountLis = serviceAccountService
+				.getAllServiceAccountList();
 
 		try {
 
@@ -146,6 +154,8 @@ public class ChatController {
 
 				res.put("user", firendList);
 				res.put("group", groupList);
+				res.put("service", accountLis);
+				
 
 				fjr = new FormatJsonResult(1, "", "", null, res);
 

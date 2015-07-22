@@ -11,14 +11,14 @@ public class IC {
 	public static final String redis_root = "im.dev.";
 	public static String server_connect_address = "192.168.1.200:12356";
 
-
 	// public static final String redis_root = "im.";
 	// public static String server_connect_address = "192.168.1.12:12356";//
-	 
-	 public static  final String redisCode = "utf-8";
 
-	 
-	 public static final int maxidle = 30000;// 最大空闲30s
+	public static final String redisCode = "utf-8";
+
+	public static final int maxidle = 30000;// 最大空闲30s
+
+	public static final String systemUid = "system";
 	// 客户端连接地址·
 
 	// redis接收消息 队列 key
@@ -59,9 +59,12 @@ public class IC {
 
 	// mongo动态
 	public static final String mongodb_dynamic = "dynamic";
-	
-	//mongo动态评论
+
+	// mongo动态评论
 	public static final String mongodb_dynamic_comment = "dynamic_comment";
+
+	// mongo服务号
+	public static final String mongodb_service = "service";
 
 	/**
 	 * 上下线通知
