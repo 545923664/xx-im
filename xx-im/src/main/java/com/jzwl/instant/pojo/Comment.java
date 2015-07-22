@@ -14,7 +14,13 @@ public class Comment {
 	private String did;
 
 	private String fromUid;
+	private String fromUserNcikName;
+	private String fromUserAvatar;
+
 	private String toUid;
+	private String toUserNickName;
+	private String toUserAvatar;
+
 	private String message;
 
 	private long commentDate;
@@ -73,6 +79,38 @@ public class Comment {
 
 	public void setPid(String pid) {
 		this.pid = pid;
+	}
+
+	public String getFromUserNcikName() {
+		return fromUserNcikName;
+	}
+
+	public void setFromUserNcikName(String fromUserNcikName) {
+		this.fromUserNcikName = fromUserNcikName;
+	}
+
+	public String getFromUserAvatar() {
+		return fromUserAvatar;
+	}
+
+	public void setFromUserAvatar(String fromUserAvatar) {
+		this.fromUserAvatar = fromUserAvatar;
+	}
+
+	public String getToUserNickName() {
+		return toUserNickName;
+	}
+
+	public void setToUserNickName(String toUserNickName) {
+		this.toUserNickName = toUserNickName;
+	}
+
+	public String getToUserAvatar() {
+		return toUserAvatar;
+	}
+
+	public void setToUserAvatar(String toUserAvatar) {
+		this.toUserAvatar = toUserAvatar;
 	}
 
 }

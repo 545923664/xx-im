@@ -1,6 +1,8 @@
 package com.jzwl.instant.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -147,6 +149,7 @@ public class UserController {
 
 					Map<String, Object> map = new HashMap<String, Object>();
 
+					map.put("user", user);
 					map.put("userinfo", user);
 
 					fjr = new FormatJsonResult(1, user.getUsername(), "", null,
@@ -276,6 +279,7 @@ public class UserController {
 
 	/**
 	 * 查看用户个人信息
+	 * 
 	 * @param request
 	 * @param response
 	 */
@@ -303,6 +307,7 @@ public class UserController {
 
 					if (null != user) {
 						map.put("user", user);
+						map.put("userinfo", user);
 					}
 				}
 
@@ -313,6 +318,44 @@ public class UserController {
 
 					fjr = new FormatJsonResult(0, "用户不存在", "t", null, null);
 				}
+
+			} else {
+
+				fjr = new FormatJsonResult(0, "参数错误", "t", null, null);
+
+			}
+
+			JsonTool.printMsg(response, gson.toJson(fjr));
+
+		} catch (Exception e) {
+
+			fjr = new FormatJsonResult(0, e.getMessage(), "t", null, null);
+
+			JsonTool.printMsg(response, gson.toJson(fjr));
+			e.printStackTrace();
+		}
+	}
+
+	@RequestMapping(value = "/searchUser")
+	public void searchUser(HttpServletRequest request,
+			HttpServletResponse response) {
+
+		FormatJsonResult fjr = null;
+
+		try {
+
+			List<Object> list = new ArrayList<Object>();
+
+			String userNickName = request.getParameter("userNickName");// 昵称
+
+			if (N.isNotNull(userNickName)) {
+
+				List<UserInfo> searchUserList = userService
+						.searchUserByNickName(userNickName);
+
+				list.addAll(searchUserList);
+
+				fjr = new FormatJsonResult(1, "搜索列表", "t", list, null);
 
 			} else {
 

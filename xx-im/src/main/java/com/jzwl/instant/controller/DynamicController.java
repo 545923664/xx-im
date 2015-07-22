@@ -103,13 +103,13 @@ public class DynamicController {
 	public void publishDynamic(HttpServletRequest request,
 			HttpServletResponse response) {
 
-		FormatJsonResult fjr = null;	
+		FormatJsonResult fjr = null;
 
 		try {
 
 			String uid = request.getParameter("uid");// username
 			String text = request.getParameter("text");// 发表的文字
-			
+
 			String status = "a";// 默认只有文字
 
 			if (N.isNotNull(uid) && N.isNotNull(text)) {
@@ -164,6 +164,12 @@ public class DynamicController {
 		}
 	}
 
+	/**
+	 * 发布评论
+	 * 
+	 * @param request
+	 * @param response
+	 */
 	@RequestMapping(value = "/publishComment")
 	public void publishComment(HttpServletRequest request,
 			HttpServletResponse response) {
@@ -190,6 +196,51 @@ public class DynamicController {
 
 				} else {
 					fjr = new FormatJsonResult(0, "评论失败", "t", null, null);
+
+				}
+
+			} else {
+				fjr = new FormatJsonResult(0, "参数错误", "t", null, null);
+			}
+
+			JsonTool.printMsg(response, gson.toJson(fjr));
+
+		} catch (Exception e) {
+
+			fjr = new FormatJsonResult(0, e.getMessage(), "t", null, null);
+
+			JsonTool.printMsg(response, gson.toJson(fjr));
+			e.printStackTrace();
+		}
+	}
+
+	@RequestMapping(value = "/zan")
+	public void zan(HttpServletRequest request, HttpServletResponse response) {
+
+		FormatJsonResult fjr = null;
+
+		try {
+
+			String type = request.getParameter("type");// 点赞or取消点赞
+			String did = request.getParameter("did");// 动态id
+			String uid = request.getParameter("uid");// 点赞的人
+
+			if (N.isNotNull(type) && N.isNotNull(did) && N.isNotNull(uid)) {
+
+				boolean flag = false;
+
+				if (type.equals("1")) {// 点赞
+					flag = dynamicService.zan(uid, did);
+				} else {// 0 取消点赞
+					flag = dynamicService.cancelZan(uid, did);
+				}
+
+				if (flag) {
+					
+					fjr = new FormatJsonResult(1, "成功", "t", null, null);
+
+				} else {
+					fjr = new FormatJsonResult(0, "失败", "t", null, null);
 
 				}
 

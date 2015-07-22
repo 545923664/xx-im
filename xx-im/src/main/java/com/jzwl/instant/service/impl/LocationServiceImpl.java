@@ -107,7 +107,7 @@ public class LocationServiceImpl implements LocationService {
 	 * @param lat2
 	 * @return
 	 */
-	private double getDistance(double lng1, double lat1, double lng2, double lat2) {
+	public double getDistance(double lng1, double lat1, double lng2, double lat2) {
 		double x, y;
 		double distance;
 		x = (lng2 - lng1) * PI * R * Math.cos(((lat1 + lat2) / 2) * PI / 180)

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.jzwl.instant.pojo.Dynamic;
-import com.mongodb.DBObject;
 
 /**
  * 动态
@@ -47,5 +46,31 @@ public interface DynamicService {
 	 */
 	public boolean publishComment(String did, String pid, String fromUid,
 			String toUid, String message);
+	
+	/**
+	 * 获取一条动态
+	 * 
+	 * @param did
+	 * @return
+	 */
+	public Dynamic getDynamic(String did);
+	
+	/**
+	 * 点赞
+	 * 
+	 * @param uid
+	 * @param did
+	 * @return
+	 */
+	public boolean zan(String uid, String did);
+	
+
+	/**
+	 * 取消点赞
+	 * @param uid
+	 * @param did
+	 * @return
+	 */
+	public boolean cancelZan(String uid, String did);
 
 }

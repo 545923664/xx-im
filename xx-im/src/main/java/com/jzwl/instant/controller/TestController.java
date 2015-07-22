@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,6 +15,7 @@ import com.jzwl.base.controller.BaseController;
 import com.jzwl.base.service.MongoService;
 import com.jzwl.base.service.RedisService;
 import com.jzwl.instant.util.IC;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 @Controller
@@ -103,6 +105,24 @@ public class TestController extends BaseController {
 
 		System.out.println(getDistance(116.3104622, 39.97691306, 116.308901,
 				39.983375));
+		
+		
+		
+
+		String userNickName="ba";
+		
+		cond.clear();
+		Pattern pattern = Pattern.compile("^.*" + userNickName+ ".*$", Pattern.CASE_INSENSITIVE); 
+		
+		cond.put("userNickName", pattern);
+
+		System.out.println(mongoService.findList(IC.mongodb_userinfo, cond).toString());
+		
+		
+		
+		
+		
+		
 
 	}
 

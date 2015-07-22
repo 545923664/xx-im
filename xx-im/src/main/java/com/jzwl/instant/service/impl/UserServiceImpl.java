@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.mina.core.session.IoSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -157,6 +158,50 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return null;
+	}
+
+	/**
+	 * 通过昵称搜索用户
+	 * @param userNickName
+	 * @return
+	 */
+	public List<UserInfo> searchUserByNickName(String userNickName) {
+
+		List<UserInfo> userList = new ArrayList<UserInfo>();
+
+		try {
+
+			Map<String, Object> cond = new HashMap<String, Object>();
+
+			Pattern pattern = Pattern.compile("^.*" + userNickName + ".*$",
+					Pattern.CASE_INSENSITIVE);
+
+			cond.put("userNickName", pattern);
+
+			List<DBObject> list = mongoService.findList(IC.mongodb_userinfo,
+					cond);
+
+			for (DBObject obj : list) {
+				obj.removeField("_id");
+
+				String json = gson.toJson(obj);
+
+				UserInfo user = gson.fromJson(json, UserInfo.class);
+
+				if (null != user) {
+
+					setUserInfo(user.getUsername(), user);
+
+					userList.add(user);
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return userList;
+		}
+
+		return userList;
 	}
 
 	/**
@@ -315,10 +360,8 @@ public class UserServiceImpl implements UserService {
 
 			// 持久化写入用户信息
 			saveUserInfoToDB(username, user);
-
-			String res = gson.toJson(user);
-			redisService.set(IC.user_simple_info_key + username, res,
-					IC.MIN_1 * 10);
+			// 缓存用户信息
+			setUserInfo(username, user);
 
 		}
 	}
@@ -331,11 +374,10 @@ public class UserServiceImpl implements UserService {
 	 * @param newSession
 	 */
 	public void setUserInfo(String username, UserInfo user) {
-
 		if (null != user) {
 			String res = gson.toJson(user);
 			redisService.set(IC.user_simple_info_key + username, res,
-					IC.MIN_1 * 10);
+					IC.MIN_1 * 3);
 		}
 
 	}
@@ -370,6 +412,45 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return null;
+	}
+
+	/**
+	 * 获取user从缓存或者db
+	 * 
+	 * @param username
+	 * @return
+	 */
+	public UserInfo getUser(String username) {
+
+		UserInfo user = null;
+
+		try {
+			String res = redisService.get(IC.user_simple_info_key + username);
+
+			if (null != res) {
+				user = gson.fromJson(res, UserInfo.class);
+
+				if (null != user) {
+					return user;
+				}
+
+			}
+
+			if (null == user) {
+				user = getUserInfoFromDB(username);
+
+				if (null != user) {
+					return user;
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		return null;
+
 	}
 
 	/**

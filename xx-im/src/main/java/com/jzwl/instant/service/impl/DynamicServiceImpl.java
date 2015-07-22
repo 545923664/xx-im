@@ -15,6 +15,7 @@ import com.jzwl.base.service.MongoService;
 import com.jzwl.base.service.RedisService;
 import com.jzwl.instant.pojo.Comment;
 import com.jzwl.instant.pojo.Dynamic;
+import com.jzwl.instant.pojo.UserInfo;
 import com.jzwl.instant.service.DynamicService;
 import com.jzwl.instant.service.UserService;
 import com.jzwl.instant.util.IC;
@@ -67,9 +68,62 @@ public class DynamicServiceImpl implements DynamicService {
 
 				Dynamic dynamic = gson.fromJson(json, Dynamic.class);
 
-				dynamic.setComments(getCommentsByDid(dynamic.getDid()));
+				if (null != dynamic) {
 
-				res.add(dynamic);
+					String dynamic_uid = dynamic.getUid();
+
+					UserInfo dynamic_user = userService.getUser(dynamic_uid);
+
+					dynamic.setUserAvatar(dynamic_user.getAvatar());
+					dynamic.setUserNickName(dynamic_user.getUserNickName());
+
+					// 评论附加属性
+					Set<Comment> comments = getCommentsByDid(dynamic.getDid());
+
+					for (Comment comment : comments) {
+
+						String comment_from_uid = comment.getFromUid();
+
+						UserInfo comment_from_user = userService
+								.getUser(comment_from_uid);
+
+						comment.setFromUserAvatar(comment_from_user.getAvatar());
+						comment.setFromUserNcikName(comment_from_user
+								.getUserNickName());
+
+						String comment_to_uid = comment.getToUid();
+						UserInfo comment_to_user = userService
+								.getUser(comment_to_uid);
+
+						comment.setToUserAvatar(comment_to_user.getAvatar());
+						comment.setToUserNickName(comment_to_user
+								.getUserNickName());
+
+					}
+
+					dynamic.setComments(comments);
+
+					// 点赞 附加属性
+					if (null == dynamic.getZanUsers()) {
+						dynamic.setZanUsers(new HashSet<String>());
+					}
+
+					Set<String> zanUsers = dynamic.getZanUsers();
+
+					for (String zanUid : zanUsers) {
+
+						if (null == dynamic.getZanUsersInfo()) {
+							dynamic.setZanUsersInfo(new HashMap<String, String>());
+						}
+
+						dynamic.getZanUsersInfo().put(zanUid,
+								userService.getUserNickName(zanUid));
+
+					}
+
+					res.add(dynamic);
+
+				}
 
 			}
 
@@ -101,7 +155,6 @@ public class DynamicServiceImpl implements DynamicService {
 
 			dynamic.setDid(Util.getUUID());
 			dynamic.setUid(uid);
-			dynamic.setUserNickName(userService.getUserNickName(uid));
 			dynamic.setStatus(status);
 			dynamic.setText(text);
 			dynamic.setPicCount(picCount);
@@ -111,6 +164,131 @@ public class DynamicServiceImpl implements DynamicService {
 			mongoService.save(IC.mongodb_dynamic, dynamic);
 
 			return true;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			return false;
+		}
+
+	}
+
+	/**
+	 * 获取一条动态
+	 * 
+	 * @param did
+	 * @return
+	 */
+	public Dynamic getDynamic(String did) {
+		try {
+
+			Map<String, Object> cond = new HashMap<String, Object>();
+			cond.put("did", did);
+
+			List<DBObject> list = mongoService.findList(IC.mongodb_dynamic,
+					cond);
+
+			if (null != list && list.size() > 0) {
+				DBObject obj = list.get(0);
+
+				obj.removeField("_id");
+
+				String json = gson.toJson(obj);
+
+				Dynamic dynamic = gson.fromJson(json, Dynamic.class);
+
+				if (null != dynamic) {
+
+					return dynamic;
+
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		return null;
+	}
+
+	/**
+	 * 点赞
+	 * 
+	 * @param uid
+	 * @param did
+	 * @return
+	 */
+	public boolean zan(String uid, String did) {
+
+		try {
+
+			Dynamic dynamic = getDynamic(did);
+
+			if (null != dynamic) {
+
+				Map<String, Object> cond = new HashMap<String, Object>();
+				cond.put("did", did);
+
+
+				if (null == dynamic.getZanUsers()) {
+					dynamic.setZanUsers(new HashSet<String>());
+				}
+
+				dynamic.getZanUsers().add(uid);
+
+				Map<String, Object> updateValue = new HashMap<String, Object>();
+				updateValue.put("zanUsers", dynamic.getZanUsers());
+				updateValue.put("zanCount", dynamic.getZanUsers().size());
+
+				mongoService.update(IC.mongodb_dynamic, cond, updateValue);
+
+				return true;
+			}
+
+			return false;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			return false;
+		}
+
+	}
+
+	/**
+	 * 取消点赞
+	 * 
+	 * @param uid
+	 * @param did
+	 * @return
+	 */
+	public boolean cancelZan(String uid, String did) {
+
+		try {
+
+			Dynamic dynamic = getDynamic(did);
+
+			if (null != dynamic) {
+
+				Map<String, Object> cond = new HashMap<String, Object>();
+				cond.put("did", did);
+
+				if (null == dynamic.getZanUsers()) {
+					dynamic.setZanUsers(new HashSet<String>());
+				}
+
+				dynamic.getZanUsers().remove(uid);
+
+				Map<String, Object> updateValue = new HashMap<String, Object>();
+				updateValue.put("zanUsers", dynamic.getZanUsers());
+				updateValue.put("zanCount", dynamic.getZanUsers().size());
+
+				mongoService.update(IC.mongodb_dynamic, cond, updateValue);
+
+				return true;
+			}
+
+			return false;
 
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -44,6 +44,14 @@ public interface UserService {
 	public UserInfo findUserByAccount(String account, String password);
 
 	/**
+	 * 通过昵称搜索用户
+	 * 
+	 * @param userNickName
+	 * @return
+	 */
+	public List<UserInfo> searchUserByNickName(String userNickName);
+
+	/**
 	 * 登录时保存用户信息到数据库
 	 * 
 	 * @param mongoService
@@ -90,6 +98,14 @@ public interface UserService {
 	 * @return
 	 */
 	public UserInfo getUserInfo(String username);
+
+	/**
+	 * 获取user从缓存或者db
+	 * 
+	 * @param username
+	 * @return
+	 */
+	public UserInfo getUser(String username);
 
 	/**
 	 * 更新群信息（创建|加入）
