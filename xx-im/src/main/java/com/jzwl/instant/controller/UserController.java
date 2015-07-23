@@ -24,7 +24,7 @@ import com.jzwl.instant.service.SendService;
 import com.jzwl.instant.service.SessionService;
 import com.jzwl.instant.service.UserService;
 import com.jzwl.instant.util.JsonTool;
-import com.jzwl.instant.util.N;
+import com.jzwl.instant.util.X;
 
 @Controller
 @RequestMapping("/user")
@@ -64,7 +64,7 @@ public class UserController {
 		try {
 
 			String account = request.getParameter("account");// 账号
-			String nickname = request.getParameter("nickname");// 昵称
+			String nickname = X.get(request, "nickname");// 昵称
 			String password = request.getParameter("password");
 			String password2 = request.getParameter("password2");
 
@@ -235,7 +235,7 @@ public class UserController {
 
 			String username = request.getParameter("username");// 发起人
 
-			String fileName = request.getParameter("fileName");
+			String fileName = X.get(request, "fileName");
 
 			if (null != username && null != fileName) {
 
@@ -295,7 +295,7 @@ public class UserController {
 
 			String username = request.getParameter("username");// 账号
 
-			if (N.isNotNull(username)) {
+			if (X.isNotNull(username)) {
 
 				UserInfo user = userService.getUserInfo(username);
 
@@ -348,7 +348,7 @@ public class UserController {
 
 			String userNickName = request.getParameter("userNickName");// 昵称
 
-			if (N.isNotNull(userNickName)) {
+			if (X.isNotNull(userNickName)) {
 
 				List<UserInfo> searchUserList = userService
 						.searchUserByNickName(userNickName);

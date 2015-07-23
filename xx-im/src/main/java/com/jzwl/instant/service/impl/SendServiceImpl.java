@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import com.jzwl.base.service.MongoService;
 import com.jzwl.base.service.RedisService;
 import com.jzwl.instant.pojo.MyMessage;
+import com.jzwl.instant.pojo.ServiceMessage;
 import com.jzwl.instant.pojo.UserInfo;
 import com.jzwl.instant.service.MessageService;
 import com.jzwl.instant.service.SendService;
@@ -293,6 +294,33 @@ public class SendServiceImpl implements SendService {
 		message.putExtKey("tip", "1");// 提示类
 
 		session.write(gson.toJson(message));
+
+	}
+
+	/**
+	 * 发送服务消息
+	 * 
+	 * @param username
+	 * @param serviceMessage
+	 */
+	public void sendServiceMessage(String username,
+			ServiceMessage serviceMessage) {
+
+		MyMessage message = new MyMessage();
+
+		message.setModel(IC.SERVICE_CHAT);
+		message.setMessageType("3");
+		message.setUsername(IC.systemUid);
+		message.setTousername(username);
+		message.setMessage("service");
+		message.setDate(DateUtil.getDate());
+
+		message.setObj(serviceMessage);
+
+		String res = gson.toJson(message);
+		messageService.joinSendQueue(res);
+
+		L.out(res);
 
 	}
 }

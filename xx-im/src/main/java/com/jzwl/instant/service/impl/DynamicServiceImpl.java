@@ -19,7 +19,7 @@ import com.jzwl.instant.pojo.UserInfo;
 import com.jzwl.instant.service.DynamicService;
 import com.jzwl.instant.service.UserService;
 import com.jzwl.instant.util.IC;
-import com.jzwl.instant.util.N;
+import com.jzwl.instant.util.X;
 import com.jzwl.instant.util.Util;
 import com.mongodb.DBObject;
 
@@ -326,7 +326,7 @@ public class DynamicServiceImpl implements DynamicService {
 				comment.setCid(System.currentTimeMillis() + "");
 				comment.setDid(did);
 
-				if (N.isNotNull(pid)) {
+				if (X.isNotNull(pid)) {
 					comment.setPid(pid);
 				} else {
 					comment.setPid("#");// 普通

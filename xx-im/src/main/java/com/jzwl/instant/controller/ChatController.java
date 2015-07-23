@@ -32,7 +32,7 @@ import com.jzwl.instant.service.SessionService;
 import com.jzwl.instant.service.UserService;
 import com.jzwl.instant.util.IC;
 import com.jzwl.instant.util.JsonTool;
-import com.jzwl.instant.util.N;
+import com.jzwl.instant.util.X;
 
 @Controller
 @RequestMapping("/chat")
@@ -93,7 +93,7 @@ public class ChatController {
 
 			UserInfo me = userService.getUser(username);
 
-			if (N.isNotNull(username)) {
+			if (X.isNotNull(username)) {
 				// 先获取好友|群
 				if (null != username) {
 					friends = friendService.getFriendList(username);

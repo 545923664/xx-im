@@ -23,7 +23,7 @@ import com.jzwl.instant.service.FileService;
 import com.jzwl.instant.service.ServiceAccountService;
 import com.jzwl.instant.util.IC;
 import com.jzwl.instant.util.JsonTool;
-import com.jzwl.instant.util.N;
+import com.jzwl.instant.util.X;
 
 @Controller
 @RequestMapping("/serviceAccount")
@@ -43,20 +43,20 @@ public class ServiceAccountController {
 	private Gson gson = new Gson();
 
 	@RequestMapping(value = "/addSystemAccount")
-	public void chatFileUpload(HttpServletRequest request,
+	public void addSystemAccount(HttpServletRequest request,
 			HttpServletResponse response) {
 
 		FormatJsonResult fjr = null;
 
 		try {
 
-			String serviceName = request.getParameter("serviceName");
-			String functonDesc = request.getParameter("functonDesc");
-			String serviceMaster = request.getParameter("serviceMaster");
+			String serviceName = X.get(request, "serviceName");
+			String functonDesc = X.get(request, "functonDesc");
+			String serviceMaster = X.get(request, "serviceMaster");
 			String serviceAvatar = "";
 
-			if (N.isNotNull(serviceName) && N.isNotNull(functonDesc)
-					&& N.isNotNull(serviceMaster)) {
+			if (X.isNotNull(serviceName) && X.isNotNull(functonDesc)
+					&& X.isNotNull(serviceMaster)) {
 
 				Set<String> picUrls = fileService.uploadPics(request,
 						IC.systemUid);
@@ -77,6 +77,44 @@ public class ServiceAccountController {
 
 					fjr = new FormatJsonResult(0, "创建失败", "t", null, null);
 				}
+
+			} else {
+				fjr = new FormatJsonResult(0, "参数错误", "t", null, null);
+			}
+
+			JsonTool.printMsg(response, gson.toJson(fjr));
+
+		} catch (Exception e) {
+
+			fjr = new FormatJsonResult(0, e.getMessage(), "t", null, null);
+
+			JsonTool.printMsg(response, gson.toJson(fjr));
+			e.printStackTrace();
+		}
+	}
+
+	@RequestMapping(value = "/serviceAccountClick")
+	public void serviceAccountClick(HttpServletRequest request,
+			HttpServletResponse response) {
+
+		FormatJsonResult fjr = null;
+
+		try {
+			String sid = request.getParameter("sid");
+
+			String uid = request.getParameter("uid");
+
+			String bid = request.getParameter("bid");
+
+			String value = request.getParameter("value");
+
+			if (X.isNotNull(sid) && X.isNotNull(uid) && X.isNotNull(bid)
+					&& X.isNotNull(value)) {
+
+				serviceAccountService.ctrlServiceAccountRequest(sid, bid,
+						value, uid);
+				
+				fjr = new FormatJsonResult(1, "请稍后", "t", null, null);
 
 			} else {
 				fjr = new FormatJsonResult(0, "参数错误", "t", null, null);
@@ -139,7 +177,7 @@ public class ServiceAccountController {
 
 		btn_1.setBid("10");
 		btn_1.setPid("#");
-		btn_1.setName("左菜单");
+		btn_1.setName("功能展示");
 		btn_1.setValue("10");
 		btn_1.setLocation("L");
 		btn_1.setType("menu");
@@ -173,7 +211,7 @@ public class ServiceAccountController {
 
 		btn_2.setBid("20");
 		btn_2.setPid("#");
-		btn_2.setName("中菜单");
+		btn_2.setName("系统帮助");
 		btn_2.setValue("20");
 		btn_2.setLocation("C");
 		btn_2.setType("menu");
@@ -183,7 +221,7 @@ public class ServiceAccountController {
 
 		btn_2_1.setBid("201");
 		btn_2_1.setPid("20");
-		btn_2_1.setName("中间1无连接");
+		btn_2_1.setName("点击试试");
 		btn_2_1.setValue("201");
 		btn_2_1.setLocation("C");
 		btn_2_1.setType("btn");

@@ -15,3 +15,34 @@ var x = {
 	"uid" : "5459",
 	"userNickName" : "5459"
 }
+
+x = {
+	"msgid" : "2015072318050000181",
+	"username" : "system",
+	"tousername" : "0",
+	"model" : "servicechat",
+	"messageType" : "3",
+	"message" : "service",
+	"date" : "2015-7-23 18:5:18",
+	"ext" : {},
+	"obj" : {
+		"banner" : {
+			"text" : "最上面的大图",
+			"picUrl" : "https://www.baidu.com/img/bdlogo.png",
+			"link" : "https://www.baidu.com"
+		},
+		"items" : [ {
+			"text" : "图2",
+			"picUrl" : "https://www.baidu.com/img/bdlogo.png",
+			"link" : "https://www.baidu.com"
+		}, {
+			"text" : "图1",
+			"picUrl" : "https://www.baidu.com/img/bdlogo.png",
+			"link" : "https://www.baidu.com"
+		}, {
+			"text" : "图0",
+			"picUrl" : "https://www.baidu.com/img/bdlogo.png",
+			"link" : "https://www.baidu.com"
+		} ]
+	}
+}

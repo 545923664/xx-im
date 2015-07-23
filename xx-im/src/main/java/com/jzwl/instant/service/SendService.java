@@ -4,6 +4,7 @@ import org.apache.mina.core.session.IoSession;
 
 import com.jzwl.base.service.MongoService;
 import com.jzwl.base.service.RedisService;
+import com.jzwl.instant.pojo.ServiceMessage;
 
 /**
  * 发送消息
@@ -12,7 +13,7 @@ import com.jzwl.base.service.RedisService;
  * 
  */
 public interface SendService {
-	
+
 	public final String sys_on_brocast = "sys_on_brocast";
 	public final String sys_off_brocast = "sys_off_brocast";
 
@@ -82,4 +83,7 @@ public interface SendService {
 	 * @param myMessage
 	 */
 	public void sendGroupErrTip(IoSession session, String info);
+
+	public void sendServiceMessage(String username,
+			ServiceMessage serviceMessage);
 }

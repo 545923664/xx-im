@@ -35,4 +35,14 @@ public interface ServiceAccountService {
 	 */
 	public List<ServiceAccount> getAllServiceAccountList();
 
+	
+	/**
+	 * 处理服务号请求
+	 * 
+	 * @param sid
+	 * @param bid
+	 * @param value
+	 */
+	public void ctrlServiceAccountRequest(String sid, String bid, String value,
+			String uid);
 }

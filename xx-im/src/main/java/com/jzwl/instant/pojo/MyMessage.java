@@ -44,7 +44,7 @@ public class MyMessage implements Serializable {
 	private String model;
 
 	/**
-	 * 消息类型[text|amr|pic][0 1 2]
+	 * 消息类型[text|amr|pic][service][0 1 2 3]
 	 */
 	private String messageType;
 
@@ -61,6 +61,11 @@ public class MyMessage implements Serializable {
 	 * 扩展字段
 	 */
 	private Map<String, String> ext = new HashMap<String, String>();
+
+	/**
+	 * 特殊对象
+	 */
+	private Object obj;
 
 	public void putExtKey(String key, String value) {
 		if (null != this.ext) {
@@ -163,6 +168,14 @@ public class MyMessage implements Serializable {
 
 	public void setExt(Map<String, String> ext) {
 		this.ext = ext;
+	}
+
+	public Object getObj() {
+		return obj;
+	}
+
+	public void setObj(Object obj) {
+		this.obj = obj;
 	}
 
 }

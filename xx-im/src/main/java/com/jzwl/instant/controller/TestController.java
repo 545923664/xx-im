@@ -1,5 +1,6 @@
 package com.jzwl.instant.controller;
 
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -78,45 +79,46 @@ public class TestController extends BaseController {
 	@RequestMapping("/mongo")
 	public void mongo() {
 
-		System.out.println(mongoService.find("school").size());
-
-		Map<String, Object> cond = new LinkedHashMap<String, Object>();
-
-		Map<String, Object> loc = new LinkedHashMap<String, Object>();
-
-		Map<String, Double> location = new HashMap<String, Double>();
-		location.put("lng", 116.30);
-		location.put("lat", 39.98);
-
-		loc.put("$near", location);
-		loc.put("$maxDistance", 37);
-
-		cond.put("loc", loc);
-
-		System.out.println(gson.toJson(cond));
-
-		List<DBObject> findList = mongoService.findList(IC.mongodb_userinfo,
-				cond);
-
-		for (DBObject dbObject : findList) {
-			System.out.println(dbObject);
-
-		}
-
-		System.out.println(getDistance(116.3104622, 39.97691306, 116.308901,
-				39.983375));
-		
-		
-		
-
-		String userNickName="ba";
-		
-		cond.clear();
-		Pattern pattern = Pattern.compile("^.*" + userNickName+ ".*$", Pattern.CASE_INSENSITIVE); 
-		
-		cond.put("userNickName", pattern);
-
-		System.out.println(mongoService.findList(IC.mongodb_userinfo, cond).toString());
+//		System.out.println(mongoService.find("school").size());
+//
+//		Map<String, Object> cond = new LinkedHashMap<String, Object>();
+//
+//		Map<String, Object> loc = new LinkedHashMap<String, Object>();
+//
+//		Map<String, Double> location = new HashMap<String, Double>();
+//		location.put("lng", 116.30);
+//		location.put("lat", 39.98);
+//
+//		loc.put("$near", location);
+//		loc.put("$maxDistance", 37);
+//
+//		cond.put("loc", loc);
+//
+//		System.out.println(gson.toJson(cond));
+//
+//		List<DBObject> findList = mongoService.findList(IC.mongodb_userinfo,
+//				cond);
+//
+//		for (DBObject dbObject : findList) {
+//			System.out.println(dbObject);
+//
+//		}
+//
+//		System.out.println(getDistance(116.3104622, 39.97691306, 116.308901,
+//				39.983375));
+//		
+//		
+//		
+//
+//		String userNickName="ba";
+//		
+//		cond.clear();
+//		Pattern pattern = Pattern.compile("^.*" + userNickName+ ".*$", Pattern.CASE_INSENSITIVE); 
+//		
+//		cond.put("userNickName", pattern);
+//
+//		System.out.println(mongoService.findList(IC.mongodb_userinfo, cond).toString());
+//		
 		
 		
 		

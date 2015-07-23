@@ -16,7 +16,7 @@ public class ServiceButton {
 	
 	private String pid;// #根 101 子节点
 
-	private String type;// click link
+	private String type;// menu btn
 
 	private String url;//link url
 

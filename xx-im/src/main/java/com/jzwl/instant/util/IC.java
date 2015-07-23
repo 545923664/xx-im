@@ -18,7 +18,8 @@ public class IC {
 
 	public static final int maxidle = 30000;// 最大空闲30s
 
-	public static final String systemUid = "system";
+	public static final String systemUid = "system";//系统uid
+	public static final String serviceSid = "1437557156306";//系统服务号sid
 	// 客户端连接地址·
 
 	// redis接收消息 队列 key
@@ -85,6 +86,12 @@ public class IC {
 	 * 群聊
 	 */
 	public static final String GROUP_CHAT = "groupchat";
+	
+	
+	/**
+	 * 服务号
+	 */
+	public static final String SERVICE_CHAT = "servicechat";
 
 	/**
 	 * ping pong

@@ -30,6 +30,7 @@ import com.jzwl.instant.service.SessionService;
 import com.jzwl.instant.service.UserService;
 import com.jzwl.instant.util.IC;
 import com.jzwl.instant.util.JsonTool;
+import com.jzwl.instant.util.X;
 
 @Controller
 @RequestMapping("/group")
@@ -74,7 +75,7 @@ public class GroupController {
 
 			String username = request.getParameter("username");// 发起人
 			String groupCode = request.getParameter("groupcode");// 五位数密码
-			String groupDesc = request.getParameter("groupDesc");// 群描述
+			String groupDesc = X.get(request,"groupDesc");// 群描述
 
 			if (null != username && null != groupCode) {
 

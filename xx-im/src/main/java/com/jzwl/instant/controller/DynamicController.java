@@ -24,7 +24,7 @@ import com.jzwl.instant.service.SendService;
 import com.jzwl.instant.service.SessionService;
 import com.jzwl.instant.service.UserService;
 import com.jzwl.instant.util.JsonTool;
-import com.jzwl.instant.util.N;
+import com.jzwl.instant.util.X;
 
 @Controller
 @RequestMapping("/dynamic")
@@ -67,7 +67,7 @@ public class DynamicController {
 
 			String uid = request.getParameter("uid");
 
-			if (N.isNotNull(uid)) {
+			if (X.isNotNull(uid)) {
 
 				List<Dynamic> list = dynamicService.getDynamicList(uid);
 
@@ -108,25 +108,25 @@ public class DynamicController {
 		try {
 
 			String uid = request.getParameter("uid");// username
-			String text = request.getParameter("text");// 发表的文字
+			String text = X.get(request, "text");// 发表的文字
 
 			String status = "a";// 默认只有文字
 
-			if (N.isNotNull(uid) && N.isNotNull(text)) {
+			if (X.isNotNull(uid) && X.isNotNull(text)) {
 
 				Set<String> picUrls = fileService.uploadPics(request, uid);
 
 				if (null != picUrls) {
 
-					if (N.isNotNull(text) && picUrls.size() > 0) {
+					if (X.isNotNull(text) && picUrls.size() > 0) {
 						status = "ab";
 					}
 
-					if (N.isNotNull(text) && picUrls.size() == 0) {
+					if (X.isNotNull(text) && picUrls.size() == 0) {
 						status = "a";
 					}
 
-					if (N.isNull(text) && picUrls.size() > 0) {
+					if (X.isNull(text) && picUrls.size() > 0) {
 						status = "b";
 					}
 
@@ -182,11 +182,11 @@ public class DynamicController {
 			String pid = request.getParameter("pid");// 父动态id 可空
 			String fromUid = request.getParameter("fromUid");// 谁评论着
 			String toUid = request.getParameter("toUid");// 被评论者
-			String message = request.getParameter("message");// 评论内容
+			String message = X.get(request, "message");// 评论内容
 
-			if (N.isNotNull(did) && N.isNotNull(fromUid)
-					&& N.isNotNull(fromUid) && N.isNotNull(toUid)
-					&& N.isNotNull(message)) {
+			if (X.isNotNull(did) && X.isNotNull(fromUid)
+					&& X.isNotNull(fromUid) && X.isNotNull(toUid)
+					&& X.isNotNull(message)) {
 
 				boolean flag = dynamicService.publishComment(did, pid, fromUid,
 						toUid, message);
@@ -225,7 +225,7 @@ public class DynamicController {
 			String did = request.getParameter("did");// 动态id
 			String uid = request.getParameter("uid");// 点赞的人
 
-			if (N.isNotNull(type) && N.isNotNull(did) && N.isNotNull(uid)) {
+			if (X.isNotNull(type) && X.isNotNull(did) && X.isNotNull(uid)) {
 
 				boolean flag = false;
 
@@ -236,7 +236,7 @@ public class DynamicController {
 				}
 
 				if (flag) {
-					
+
 					fjr = new FormatJsonResult(1, "成功", "t", null, null);
 
 				} else {
